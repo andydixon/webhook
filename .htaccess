@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Skip existing files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect all requests to the PHP script
+RewriteRule ^(.*)$ index.php [L,QSA]
