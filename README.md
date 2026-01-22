@@ -77,6 +77,33 @@ https://your-domain.com/test%40example.com/github
 - Clean, scannable layout
 - Relevant emojis for quick identification
 
+#### Webex Interact (`/wxinteract`)
+Formats Webex Interact SMS API webhook events into clean, readable emails.
+
+**Supported events:**
+- 📤 Outbound SMS - Submitted
+- ✅ Outbound SMS - Delivered
+- ❌ Outbound SMS - Failed
+- 🔗 Shortlink Clicked
+- 📥 Inbound SMS Received
+- 🚫 SMS Opt Out Received
+- 👤 Contacts Callback
+
+**Example URL:**
+```
+https://your-domain.com/test%40example.com/wxinteract
+```
+
+**What you get:**
+- Event-specific formatting with relevant emojis
+- Message content displayed in a clean message box
+- Contact and campaign information
+- Error details for failed messages
+- Click tracking details for shortlinks
+- Custom fields support for contact callbacks
+
+**Test samples available in:** `wxinteract_test_samples.json`
+
 ### Creating Your Own Parser
 
 Want to add support for Stripe, GitLab, or other services? Check out the [**Parser Development Guide**](../PARSER_PROMPT.md) for detailed instructions on creating custom parsers.
@@ -158,6 +185,49 @@ Number: #42
 Title: Add new authentication method
 State: open
 Branch: feature-auth → main
+```
+
+### With Webex Interact Parser
+
+Configure your Webex Interact API callback URL with:
+```
+https://your-domain.com/yourname%40company.com/wxinteract
+```
+
+When SMS events occur, you'll receive formatted emails like:
+
+**Outbound SMS - Submitted:**
+```
+📤 Webex Interact: Outbound SMS - Submitted
+
+Message ID: msg_123456789
+To: +61412345678
+From: +61387654321
+Campaign ID: camp_987654321
+Submitted At: 2026-01-22T16:45:00Z
+
+Message Content:
+Hello! Your appointment is confirmed for tomorrow at 2 PM.
+```
+
+**SMS Opt Out:**
+```
+🚫 Webex Interact: SMS Opt Out Received
+
+Phone Number: +61412345678
+Keyword: STOP
+Opt Out At: 2026-01-22T18:15:00Z
+```
+
+**Shortlink Clicked:**
+```
+🔗 Webex Interact: Shortlink Clicked
+
+Shortlink: https://wxint.co/abc123
+Original URL: https://example.com/special-offer
+Phone Number: +61412345678
+Clicked At: 2026-01-22T17:30:45Z
+IP Address: 203.0.113.45
 ```
 
 ## 📦 Installation
