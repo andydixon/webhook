@@ -354,6 +354,102 @@ Invalid email address provided in URL path.
             </div>
         </div>
 
+        <!-- GitHub Webhook Parser Section -->
+        <div class="doc-container">
+            <h2><i class="bi bi-github"></i> GitHub Webhook Parser</h2>
+            <p class="lead">Get beautifully formatted emails specifically designed for GitHub webhooks with enhanced event details.</p>
+
+            <h3>How to Use</h3>
+            <p>Simply add <code>/github</code> to the end of your webhook URL:</p>
+            <div class="code-block mb-4">
+https://<?php echo $_SERVER['HTTP_HOST']; ?>/<strong>{email-address}</strong>/github
+            </div>
+
+            <h3>URL Format Examples</h3>
+            <div class="row mt-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <strong>Standard Webhook</strong>
+                        </div>
+                        <div class="card-body">
+                            <code><?php echo $_SERVER['HTTP_HOST']; ?>/john%40example.com</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <strong>GitHub Webhook</strong>
+                        </div>
+                        <div class="card-body">
+                            <code><?php echo $_SERVER['HTTP_HOST']; ?>/john%40example.com/github</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Supported GitHub Events</h3>
+            <p>The GitHub parser provides enhanced formatting for these event types:</p>
+            
+            <div class="row mt-3">
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">📤 Push Events</h5>
+                            <p class="card-text">Displays branch, commit count, and individual commit messages with authors.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🔀 Pull Request Events</h5>
+                            <p class="card-text">Shows PR number, title, state, branches, and direct link to the PR.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">📝 Issue Events</h5>
+                            <p class="card-text">Displays issue number, title, state, and link to the issue.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🚀 Release Events</h5>
+                            <p class="card-text">Shows release tag, name, and direct link to the release page.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <i class="bi bi-lightbulb"></i> <strong>All Events Supported:</strong> Even if an event isn't specifically formatted above, the parser will display it in a clean, structured format showing all webhook data.
+            </div>
+
+            <h3 class="mt-4">Setting Up in GitHub</h3>
+            <p>To configure a GitHub webhook:</p>
+            <ol>
+                <li>Go to your repository settings → Webhooks → Add webhook</li>
+                <li>Set the Payload URL to: <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/your%40email.com/github</code></li>
+                <li>Set Content type to: <strong>application/json</strong></li>
+                <li>Choose which events to receive (or select "Send me everything")</li>
+                <li>Click "Add webhook"</li>
+            </ol>
+
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> <strong>Subject Line:</strong> GitHub webhook emails arrive with event-specific subject lines like <strong>"📤 GitHub push - username/repo"</strong> or <strong>"🔀 GitHub pull_request (opened) - username/repo"</strong> for easy filtering.
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="bi bi-info-circle"></i> <strong>Tip:</strong> Use email plus addressing like <code>you+github%40example.com</code> to easily filter GitHub webhooks in your inbox.
+            </div>
+        </div>
+
         <!-- Use Cases Section -->
         <div class="doc-container">
             <h2><i class="bi bi-star"></i> Common Use Cases</h2>
