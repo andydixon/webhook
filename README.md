@@ -5,10 +5,12 @@ A simple, elegant PHP solution for debugging webhooks by forwarding them directl
 ## 🌟 Features
 
 - **Email Delivery**: Receive complete webhook data directly in your inbox
+- **Custom Parsers**: Beautifully formatted emails for GitHub and other services
 - **Secure**: Built-in email validation and XSS protection
 - **Instant**: Real-time webhook processing and forwarding
 - **Simple**: No database or complex setup required
 - **Universal**: Supports all HTTP methods and content types
+- **Extensible**: Easy to add new parsers for any webhook service
 
 ## 📋 Overview
 
@@ -21,18 +23,69 @@ Replace `@` with `%40` in your email address:
 - `test@example.com` becomes `test%40example.com`
 
 ### 2. Configure Webhook
-Use the following URL format as your webhook endpoint:
+Use one of the following URL formats as your webhook endpoint:
+
+**Standard format** (raw webhook data):
 ```
 https://your-domain.com/{encoded-email}
 ```
 
+**With parser** (formatted email for specific services):
+```
+https://your-domain.com/{encoded-email}/{parser-name}
+```
+
 ### 3. Check Your Inbox
-Receive detailed webhook data instantly in your email with the subject:
+Receive webhook data instantly in your email!
+
+**Standard format:**
 ```
 ‼️ Webhook Request Received - [timestamp]
 ```
 
+**With parser:**
+```
+📤 GitHub push - username/repo
+💳 Stripe payment.succeeded - $99.99
+```
+
+## 🎨 Webhook Parsers
+
+Parsers format webhooks from specific services into beautiful, readable emails.
+
+### Available Parsers
+
+#### GitHub (`/github`)
+Formats GitHub webhook events with full event details.
+
+**Supported events:**
+- Push events (with commit details)
+- Pull requests
+- Issues
+- Releases
+- And more...
+
+**Example URL:**
+```
+https://your-domain.com/test%40example.com/github
+```
+
+**What you get:**
+- Event-specific formatting
+- Commit details with author info
+- Pull request/issue metadata
+- Clean, scannable layout
+- Relevant emojis for quick identification
+
+### Creating Your Own Parser
+
+Want to add support for Stripe, GitLab, or other services? Check out the [**Parser Development Guide**](../PARSER_PROMPT.md) for detailed instructions on creating custom parsers.
+
+---
+
 ## 💡 Usage Examples
+
+### Standard Webhook (Raw Data)
 
 ### cURL - POST Request with JSON
 ```bash
@@ -71,6 +124,40 @@ response = requests.post(
     headers={'X-Custom-Header': 'MyValue'}
 )
 print(response.text)
+```
+
+### With GitHub Parser
+
+Configure your GitHub webhook with:
+```
+https://your-domain.com/yourname%40company.com/github
+```
+
+When events occur, you'll receive formatted emails like:
+
+**Push Event:**
+```
+📤 GitHub push - yourname/your-repo
+
+Repository: yourname/your-repo
+Branch: refs/heads/main
+Commits: 3
+Pusher: developerUsername
+
+Commits:
+abc1234 Fix bug in authentication by John Doe
+def5678 Update dependencies by Jane Smith
+ghi9012 Add new feature by Bob Johnson
+```
+
+**Pull Request:**
+```
+🔀 GitHub pull_request (opened) - yourname/your-repo
+
+Number: #42
+Title: Add new authentication method
+State: open
+Branch: feature-auth → main
 ```
 
 ## 📦 Installation
@@ -129,18 +216,22 @@ Each webhook email contains:
 ## 🎯 Common Use Cases
 
 - **Debugging**: See exactly what data third-party services are sending
+- **GitHub Notifications**: Get beautifully formatted emails for pushes, PRs, and issues
 - **Integration Testing**: Test webhook integrations before implementing full handlers
 - **Monitoring**: Monitor webhook activity and payload changes over time
 - **Documentation**: Capture real examples for API documentation
 - **Development**: Quickly test webhook flows during development
 - **Troubleshooting**: Diagnose issues with webhook payloads and headers
+- **Custom Parsers**: Add your own parsers for Stripe, GitLab, Slack, etc.
 
 ## 💡 Tips & Best Practices
 
-- **Email Filtering**: Create an email filter for the subject line "‼️ Webhook Request Received" to organize incoming webhooks
+- **Use Parsers**: Use `/github`, `/stripe`, etc. for prettier emails from supported services
+- **Email Filtering**: Create email filters based on subject patterns ("📤 GitHub", "💳 Stripe") to organize webhooks
 - **Plus Addressing**: Use email plus addressing (e.g., `yourname+github%40gmail.com`) to track which services are sending webhooks
 - **Timestamp in Emails**: Check the "Date Received" field to verify webhook timing and debug delivery delays
-- **Parse the Body**: The raw body section contains the exact payload - perfect for copying into your code for testing
+- **Standard Format**: Use the standard format (no parser) when you need complete raw data for debugging
+- **Create Parsers**: Build custom parsers for your favorite services - see [Parser Guide](../PARSER_PROMPT.md)
 
 ## 📝 Error Handling
 
@@ -170,6 +261,13 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 Give a ⭐️ if this project helped you!
 
 ## 📜 Version History
+
+- **2.0.0** - Parser System Release
+  - ✨ **NEW**: Custom parser support for formatted webhooks
+  - ✨ **NEW**: GitHub webhook parser with full event support
+  - ✨ **NEW**: Parser development guide (PARSER_PROMPT.md)
+  - Backward compatible with existing webhook URLs
+  - Same security and styling standards
 
 - **1.0.0** - Initial release
   - Basic webhook forwarding functionality
