@@ -22,132 +22,9 @@ function jsonParse($rawBody, $headers, $metadata) {
     $contentTypeSafe = htmlspecialchars($metadata['contentType'], ENT_QUOTES, 'UTF-8');
     
     // Start building HTML
-    $html = <<<HTML
-<!DOCTYPE html>
-<html lang="en-GB">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Webhook Data</title>
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #1a1a1a;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        .header {
-            text-align: center;
-            padding-bottom: 30px;
-            border-bottom: 3px solid #000000;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            color: #000000;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            letter-spacing: -0.5px;
-        }
-        .header .timestamp {
-            color: #666666;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0;
-        }
-        .section {
-            margin-bottom: 35px;
-        }
-        .section-title {
-            color: #000000;
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-            letter-spacing: -0.3px;
-        }
-        .path-title {
-            color: #0066cc;
-            font-size: 16px;
-            font-weight: 600;
-            margin: 25px 0 12px 0;
-            padding: 8px 12px;
-            background-color: #f0f7ff;
-            border-left: 4px solid #0066cc;
-            border-radius: 4px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-        }
-        .metadata {
-            display: table;
-            width: 100%;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            margin-bottom: 15px;
-        }
-        .metadata-row {
-            display: table-row;
-        }
-        .metadata-row:not(:last-child) .metadata-label,
-        .metadata-row:not(:last-child) .metadata-value {
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .metadata-label {
-            display: table-cell;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: #000000;
-            width: 30%;
-            vertical-align: top;
-            font-size: 14px;
-            background-color: #f9f9f9;
-        }
-        .metadata-value {
-            display: table-cell;
-            padding: 12px 16px;
-            color: #333333;
-            font-size: 13px;
-            vertical-align: top;
-            word-break: break-word;
-        }
-        .array-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            background-color: #fafafa;
-        }
-        .array-item-title {
-            font-weight: 700;
-            color: #000000;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 25px;
-            border-top: 2px solid #e0e0e0;
-            text-align: center;
-            color: #888888;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 JSON Webhook Data</h1>
-            <p class="timestamp">$dateSafe</p>
-        </div>
+    $emailTitle = "📊 JSON Webhook Data";
+    $emailStamp = "$dateSafe";
+    $body = <<<HTML
 
         <div class="section">
             <div class="section-title">📋 Request Information</div>
@@ -173,18 +50,12 @@ function jsonParse($rawBody, $headers, $metadata) {
 HTML;
     
     // Process the JSON data
-    $html .= renderJsonData($payload);
+    $body .= renderJsonData($payload);
     
-    $html .= <<<HTML
+    $body .= <<<HTML
         </div>
-
-        <div class="footer">
-            <p>JSON data automatically parsed and formatted.</p>
-        </div>
-    </div>
-</body>
-</html>
 HTML;
+    $html = emailShell($emailTitle, $emailStamp, $body, "JSON data automatically parsed and formatted.");
     
     $subject = "📊 JSON Webhook - " . $metadata['date'];
     

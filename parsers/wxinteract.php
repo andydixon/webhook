@@ -82,150 +82,9 @@ function wxinteractParse($rawBody, $headers, $metadata) {
     
     $eventTitleSafe = htmlspecialchars($eventTitle, ENT_QUOTES, 'UTF-8');
     
-    $html = <<<HTML
-<!DOCTYPE html>
-<html lang="en-GB">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webex Interact - $eventTitleSafe</title>
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #1a1a1a;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        .header {
-            text-align: center;
-            padding-bottom: 30px;
-            border-bottom: 3px solid #000000;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            color: #000000;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            letter-spacing: -0.5px;
-        }
-        .header .timestamp {
-            color: #666666;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0;
-        }
-        .section {
-            margin-bottom: 35px;
-        }
-        .section-title {
-            color: #000000;
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-            letter-spacing: -0.3px;
-        }
-        .data-box {
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            padding: 16px 20px;
-            margin: 10px 0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #2a2a2a;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-x: auto;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            background: #f8f8f8;
-        }
-        .metadata {
-            display: table;
-            width: 100%;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        .metadata-row {
-            display: table-row;
-        }
-        .metadata-row:not(:last-child) .metadata-label,
-        .metadata-row:not(:last-child) .metadata-value {
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .metadata-label {
-            display: table-cell;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: #000000;
-            width: 35%;
-            vertical-align: top;
-            font-size: 14px;
-        }
-        .metadata-value {
-            display: table-cell;
-            padding: 12px 16px;
-            color: #333333;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-            font-size: 13px;
-            vertical-align: top;
-        }
-        .message-box {
-            border-left: 4px solid #0066cc;
-            background: #f8f8f8;
-            padding: 16px 20px;
-            margin: 15px 0;
-            border-radius: 4px;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-        .error-box {
-            border-left: 4px solid #cc0000;
-            background: #fff5f5;
-            padding: 16px 20px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        .subsection {
-            margin: 20px 0;
-        }
-        .subsection-title {
-            color: #000000;
-            font-size: 16px;
-            font-weight: 600;
-            margin: 15px 0 10px 0;
-            padding: 8px 12px;
-            background: #f0f0f0;
-            border-left: 4px solid #666666;
-            border-radius: 4px;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 25px;
-            border-top: 2px solid #e0e0e0;
-            text-align: center;
-            color: #888888;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>$eventIcon Webex Interact: $eventTitleSafe</h1>
-            <p class="timestamp">$dateSafe</p>
-        </div>
+    $emailTitle = "$eventIcon Webex Interact: $eventTitleSafe";
+    $emailStamp = "$dateSafe";
+    $body = <<<HTML
 
         <div class="section">
             <div class="section-title">📋 Event Information</div>
@@ -242,14 +101,8 @@ function wxinteractParse($rawBody, $headers, $metadata) {
         </div>
 
         $eventContent
-
-        <div class="footer">
-            <p>This Webex Interact webhook was automatically forwarded to your email address.</p>
-        </div>
-    </div>
-</body>
-</html>
 HTML;
+    $html = emailShell($emailTitle, $emailStamp, $body, "This Webex Interact webhook was automatically forwarded to your email address.");
 
     $subject = "$eventIcon Webex Interact: $eventTitle";
     
@@ -411,11 +264,11 @@ function buildShortlinkClickedContent($data) {
         <div class="metadata">
             <div class="metadata-row">
                 <div class="metadata-label">Shortlink</div>
-                <div class="metadata-value"><a href="$shortlink" style="color: #0066cc;">$shortlink</a></div>
+                <div class="metadata-value"><a href="$shortlink" style="color: #7c3aed;">$shortlink</a></div>
             </div>
             <div class="metadata-row">
                 <div class="metadata-label">Original URL</div>
-                <div class="metadata-value"><a href="$originalUrl" style="color: #0066cc;">$originalUrl</a></div>
+                <div class="metadata-value"><a href="$originalUrl" style="color: #7c3aed;">$originalUrl</a></div>
             </div>
             <div class="metadata-row">
                 <div class="metadata-label">Phone Number</div>
