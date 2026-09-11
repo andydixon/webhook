@@ -1,587 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webhook Email Forwarder - Documentation</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 0;
-        }
-        .doc-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 40px;
-            margin-bottom: 40px;
-        }
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 40px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .code-block {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            overflow-x: auto;
-        }
-        .feature-card {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            height: 100%;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        .badge-custom {
-            font-size: 0.85rem;
-            padding: 0.5em 0.8em;
-        }
-        h2 {
-            color: #667eea;
-            margin-top: 30px;
-            margin-bottom: 20px;
-        }
-        h3 {
-            color: #764ba2;
-            margin-top: 25px;
-            margin-bottom: 15px;
-        }
-        .alert-info {
-            border-left: 4px solid #0dcaf0;
-        }
-        .alert-warning {
-            border-left: 4px solid #ffc107;
-        }
-        .alert-success {
-            border-left: 4px solid #198754;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook → Email | <?php echo $_SERVER['HTTP_HOST']; ?></title>
+<meta name="description" content="Point any webhook at a URL with your email in it. Get the whole request in your inbox. That's it. That's the product.">
+<style>
+:root{
+  --bg:#0b0b10;--bg2:#12121a;--panel:#161622;--line:#26263a;
+  --text:#ececf4;--muted:#9a9ab4;--dim:#6a6a86;
+  --a1:#8b5cf6;--a2:#ec4899;--a3:#f97316;
+  --grad:linear-gradient(110deg,var(--a1),var(--a2) 55%,var(--a3));
+  --mono:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  line-height:1.6;font-size:17px;-webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 15% -10%,rgba(139,92,246,.22),transparent 60%),
+    radial-gradient(700px 400px at 90% 10%,rgba(236,72,153,.16),transparent 60%),
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:auto,auto,48px 48px,48px 48px;
+  background-attachment:fixed;
+}
+a{color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+::selection{background:var(--a2);color:#fff}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;font-size:14px}
+nav .brand{font-family:var(--mono);font-weight:700;letter-spacing:-.02em}
+nav .brand span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;color:var(--muted)}
+nav a{text-decoration:none}nav a:hover{color:var(--text)}
+@media(max-width:600px){nav ul{display:none}}
+
+/* hero */
+.hero{padding:70px 0 40px;position:relative}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--a2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+h1{font-size:clamp(2.6rem,7vw,5.2rem);line-height:.98;letter-spacing:-.04em;margin:0 0 22px;font-weight:800}
+h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:clamp(1.05rem,2vw,1.35rem);color:var(--muted);max-width:640px;margin:0 0 30px}
+.hero p b{color:var(--text);font-weight:600}
+
+/* url builder */
+.builder{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04)}
+.builder label{display:block;font-size:12px;color:var(--dim);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.builder input{
+  width:100%;font:inherit;font-size:1.1rem;padding:12px 14px;border-radius:10px;
+  background:var(--bg);border:1px solid var(--line);color:var(--text);outline:none;
+}
+.builder input:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(139,92,246,.25)}
+.url{margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.url code{flex:1;min-width:0;font-family:var(--mono);font-size:.95rem;word-break:break-all;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px dashed var(--line)}
+.url code b{color:var(--a3);font-weight:600}
+button.copy{font:inherit;font-size:.9rem;font-weight:600;padding:12px 18px;border-radius:10px;border:0;cursor:pointer;background:var(--grad);color:#fff;white-space:nowrap}
+button.copy:active{transform:scale(.97)}
+.hint{font-size:.85rem;color:var(--dim);margin:12px 0 0}
+
+/* sections */
+section{padding:56px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:-.03em;margin:0 0 8px;line-height:1.1}
+.sub{color:var(--muted);margin:0 0 28px;max-width:640px}
+h3{font-size:1.1rem;margin:28px 0 10px;letter-spacing:-.01em}
+.tangent{color:var(--dim);font-size:.92rem;font-style:italic}
+p code,li code{font-family:var(--mono);font-size:.88em;background:var(--panel);border:1px solid var(--line);padding:2px 6px;border-radius:6px;color:#fbbf24}
+
+pre{
+  margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  font-family:var(--mono);font-size:.9rem;line-height:1.55;overflow-x:auto;color:#d6d6e6;
+  position:relative
+}
+pre::before{content:attr(data-lang);position:absolute;top:8px;right:12px;font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+pre .h{color:#f9a8d4}pre .s{color:#fcd34d}pre .k{color:#a5b4fc}
+.stack{display:grid;gap:14px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;counter-reset:s}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative;counter-increment:s}
+.step::before{content:"0" counter(s);font-family:var(--mono);font-size:2.4rem;font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;display:block;margin-bottom:12px}
+.step b{display:block;font-size:1.05rem;margin-bottom:4px}
+.step span{color:var(--muted);font-size:.95rem}
+
+/* parsers */
+.parsers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.parser{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;transition:transform .15s,border-color .15s}
+.parser:hover{transform:translateY(-3px);border-color:var(--a1)}
+.parser .ico{font-size:1.6rem;margin-bottom:8px}
+.parser code{display:inline-block;font-family:var(--mono);font-size:.85rem;color:var(--a3);margin-bottom:8px}
+.parser p{margin:0;color:var(--muted);font-size:.95rem}
+
+/* inbox list */
+.inbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;list-style:none;padding:0;margin:0}
+.inbox li{padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;font-size:.95rem}
+.inbox li b{display:block;color:var(--text)}
+.inbox li span{color:var(--muted)}
+
+/* callouts */
+.note{border-left:3px solid var(--a1);padding:14px 18px;background:rgba(139,92,246,.08);border-radius:0 12px 12px 0;margin:22px 0}
+.note.warn{border-color:var(--a3);background:rgba(249,115,22,.08)}
+.note b{color:var(--text)}
+.note p{margin:0;color:var(--muted)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font-family:var(--mono);font-size:.8rem;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+
+footer{padding:50px 0 60px;border-top:1px solid var(--line);color:var(--dim);font-size:.9rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--muted)}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hero Section -->
-        <div class="hero">
-            <h1 class="display-4"><i class="bi bi-webhook"></i> Webhook Email Forwarder</h1>
-            <p class="lead">A simple, elegant solution for debugging webhooks by forwarding them directly to your email</p>
-            <p class="mb-0">Version 1.0 | Made with ❤️ by Andy Dixon</p>
-        </div>
+<div class="wrap">
 
-        <!-- Overview Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-info-circle"></i> Overview</h2>
-            <p class="lead">This webhook service captures incoming HTTP requests and forwards complete request details (headers, body, metadata) to your specified email address.</p>
-            
-            <div class="row mt-4">
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-envelope-check text-primary" style="font-size: 3rem;"></i>
-                            <h5 class="card-title mt-3">Email Delivery</h5>
-                            <p class="card-text">Receive webhook data directly in your inbox</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
-                            <h5 class="card-title mt-3">Secure</h5>
-                            <p class="card-text">Email validation and XSS protection built-in</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body text-center">
-                            <i class="bi bi-lightning-charge text-warning" style="font-size: 3rem;"></i>
-                            <h5 class="card-title mt-3">Instant</h5>
-                            <p class="card-text">Real-time webhook processing and forwarding</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<nav>
+  <div class="brand"><span>webhook</span>→email</div>
+  <ul>
+    <li><a href="#start">Start</a></li>
+    <li><a href="#examples">Examples</a></li>
+    <li><a href="#parsers">Parsers</a></li>
+    <li><a href="#inbox">Inbox</a></li>
+    <li><a href="#faq">Caveats</a></li>
+  </ul>
+</nav>
 
-        <!-- How It Works Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-gear"></i> How It Works</h2>
-            <ol class="lead">
-                <li>You configure a third-party service to send webhooks to this URL with your email encoded in the path</li>
-                <li>When a webhook request arrives, the service captures all request data</li>
-                <li>The complete request details are formatted into a readable HTML email</li>
-                <li>The email is sent to your specified address</li>
-                <li>A confirmation response is returned to the webhook sender</li>
-            </ol>
+<div class="hero">
+  <div class="eyebrow">// no signup. no dashboard. no, seriously.</div>
+  <h1>Webhooks.<br>Straight to <em>your inbox.</em></h1>
+  <p>Put your email in the URL. Point a webhook at it. Every header, every byte of body, every superglobal shows up as an email. <b>Done. Go do the next thing.</b></p>
 
-            <div class="alert alert-info mt-4">
-                <i class="bi bi-lightbulb"></i> <strong>Perfect for:</strong> Debugging webhooks, testing integrations, monitoring API callbacks, and understanding third-party service payloads.
-            </div>
-        </div>
+  <div class="builder">
+    <label for="em">Type your email → get your URL</label>
+    <input id="em" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false">
+    <div class="url">
+      <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/<b id="out">you%40example.com</b></code>
+      <button class="copy" id="cp">Copy</button>
+    </div>
+    <p class="hint">Yes the <code>@</code> becomes <code>%40</code>. Yes that's the whole trick. Add <code>/github</code>, <code>/json</code>, etc. on the end for the fancy parsers — more on that below, if you scroll that far.</p>
+  </div>
+</div>
 
-        <!-- Usage Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-code-square"></i> Usage</h2>
-            
-            <h3>Basic URL Format</h3>
-            <p>The URL format is simple - just append your URL-encoded email address to the domain:</p>
-            <div class="code-block mb-4">
-https://<?php echo $_SERVER['HTTP_HOST']; ?>/<strong>{email-address}</strong>
-            </div>
+<section id="start">
+  <h2>Three steps. Two, really.</h2>
+  <p class="sub">The third one is just "wait for an email", which you were going to do anyway.</p>
+  <div class="steps">
+    <div class="step"><b>Encode your email</b><span><code>@</code> → <code>%40</code>. The box above already did it for you. Ok moving on.</span></div>
+    <div class="step"><b>Paste the URL into whatever</b><span>Stripe, GitHub, Grafana, that cron job, a curl you're about to forget you wrote.</span></div>
+    <div class="step"><b>Check your inbox</b><span>Full request, nicely formatted. Subject starts with ‼️ so it's filterable. You're welcome.</span></div>
+  </div>
 
-            <h3>URL Encoding Your Email</h3>
-            <p>The <code>@</code> symbol must be URL-encoded as <code>%40</code>:</p>
-            
-            <div class="row mt-3">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <strong>Original Email</strong>
-                        </div>
-                        <div class="card-body">
-                            <code>john@example.com</code>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <strong>Webhook URL</strong>
-                        </div>
-                        <div class="card-body">
-                            <code><?php echo $_SERVER['HTTP_HOST']; ?>/john%40example.com</code>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <h3>The fastest possible test</h3>
+  <pre data-lang="bash">curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s" id="ex1">you%40example.com</span> \
+  -d '{"test": "hello, is this thing on"}'</pre>
+  <p class="tangent">(the email will arrive before you've alt-tabbed back. probably. depends on your mail server. anyway.)</p>
+</section>
 
-            <h3 class="mt-4">Example Requests</h3>
-            
-            <h4>cURL - POST Request with JSON</h4>
-            <div class="code-block">
-curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/test%40example.com \
+<section id="examples">
+  <h2>Examples, because reading is hard</h2>
+  <p class="sub">Any method, any content type. GET, POST, PUT, PATCH, DELETE, something you made up. JSON, form data, multipart, XML, plain text, a string of emoji. It all gets forwarded.</p>
+  <div class="stack">
+<pre data-lang="bash"><span class="h"># JSON</span>
+curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s ex">you%40example.com</span> \
   -H "Content-Type: application/json" \
   -d '{"event": "user.created", "user_id": 12345}'
-            </div>
 
-            <h4 class="mt-3">cURL - GET Request with Parameters</h4>
-            <div class="code-block">
-curl https://<?php echo $_SERVER['HTTP_HOST']; ?>/test%40example.com?event=test&id=123
-            </div>
+<span class="h"># GET with query string (yes, this works too)</span>
+curl "https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s ex">you%40example.com</span>?event=test&id=123"</pre>
 
-            <h4 class="mt-3">JavaScript - Fetch API</h4>
-            <div class="code-block">
-fetch('https://<?php echo $_SERVER['HTTP_HOST']; ?>/test%40example.com', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    event: 'order.completed',
-    order_id: 'ORD-789',
-    total: 99.99
-  })
-});
-            </div>
+<pre data-lang="javascript"><span class="k">fetch</span>(<span class="s">'https://<?php echo $_SERVER['HTTP_HOST']; ?>/'</span> + <span class="k">encodeURIComponent</span>(<span class="s">'you@example.com'</span>), {
+  method: <span class="s">'POST'</span>,
+  headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+  body: JSON.stringify({ event: <span class="s">'order.completed'</span>, order_id: <span class="s">'ORD-789'</span>, total: 99.99 })
+});</pre>
 
-            <h4 class="mt-3">Python - Requests Library</h4>
-            <div class="code-block">
-import requests
+<pre data-lang="python"><span class="k">import</span> requests
+<span class="k">from</span> urllib.parse <span class="k">import</span> quote
 
-response = requests.post(
-    'https://<?php echo $_SERVER['HTTP_HOST']; ?>/test%40example.com',
-    json={'event': 'payment.received', 'amount': 250.00},
-    headers={'X-Custom-Header': 'MyValue'}
-)
-print(response.text)
-            </div>
+requests.post(
+    <span class="s">f'https://<?php echo $_SERVER['HTTP_HOST']; ?>/{quote("you@example.com")}'</span>,
+    json={<span class="s">'event'</span>: <span class="s">'payment.received'</span>, <span class="s">'amount'</span>: 250.00},
+    headers={<span class="s">'X-Custom-Header'</span>: <span class="s">'MyValue'</span>},
+)</pre>
+  </div>
+  <div class="note">
+    <p><b>Pro tip you'll ignore and then come back for:</b> use plus addressing. <code>you+stripe%40example.com</code>, <code>you+github%40example.com</code>. Now your inbox filters do the sorting so you don't have to.</p>
+  </div>
+</section>
 
-            <div class="alert alert-warning mt-4">
-                <i class="bi bi-exclamation-triangle"></i> <strong>Important:</strong> Make sure to URL-encode your email address. Most programming languages and tools have built-in functions for this (e.g., <code>encodeURIComponent()</code> in JavaScript, <code>urllib.parse.quote()</code> in Python).
-            </div>
-        </div>
+<section id="parsers">
+  <h2>Parsers. Ooh, shiny.</h2>
+  <p class="sub">Add one word to the end of the URL and the email stops being a wall of raw JSON and starts being something you can actually read at 3am. Parser doesn't understand the payload? It falls back to the raw format. Nothing gets lost.</p>
+  <div class="parsers">
+    <div class="parser"><div class="ico">🐙</div><code>/github</code><p>Push, pull request, issue and release events get their own layout with commits, authors, branches and links. Everything else still renders, just less fancy. Subjects like <em>📤 GitHub push - you/repo</em>.</p></div>
+    <div class="parser"><div class="ico">📈</div><code>/grafana</code><p>Grafana and Prometheus Alertmanager alerts. Firing, resolved, labels, annotations. Finally know <em>which</em> thing is on fire.</p></div>
+    <div class="parser"><div class="ico">🧩</div><code>/json</code><p>Any JSON at all, rendered as tables. Nested objects get split out into their own tables with path-based titles so you can find <code>data.items[3].sku</code> without squinting.</p></div>
+    <div class="parser"><div class="ico">💬</div><code>/wxinteract</code><p>Webex Interact SMS events. Inbound messages, delivery receipts, the lot, with the event type in the subject line.</p></div>
+  </div>
 
-        <!-- Response Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-arrow-return-left"></i> What to Expect</h2>
-            
-            <h3>Immediate HTTP Response</h3>
-            <p>When your webhook is successfully received, you'll get an immediate response:</p>
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <strong>HTTP 200 OK</strong>
-                </div>
-                <div class="card-body">
-                    <div class="code-block">
-Webhook received and forwarded to: test@example.com
+  <h3>Setting up GitHub, since that's the one everyone asks about</h3>
+  <ol>
+    <li>Repo → Settings → Webhooks → Add webhook</li>
+    <li>Payload URL: <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="ex">you%40example.com</span>/github</code></li>
+    <li>Content type: <code>application/json</code></li>
+    <li>Pick events (or "Send me everything", live a little)</li>
+    <li>Save. Push something. Refresh inbox. Refresh again. There it is.</li>
+  </ol>
+</section>
 
-Request data:
-Array
-(
-    [event] => test
-    [id] => 123
-)
-                    </div>
-                </div>
-            </div>
+<section id="inbox">
+  <h2>What actually lands in your inbox</h2>
+  <p class="sub">One HTML email per request. Gmail-safe styling. All of the following, every time, whether you asked for it or not:</p>
+  <ul class="inbox">
+    <li><b>Timestamp</b><span>when it arrived, to the second</span></li>
+    <li><b>Source IP + method</b><span>who sent it and how</span></li>
+    <li><b>Content-Type</b><span>what they claimed it was</span></li>
+    <li><b>Every header</b><span>auth, signatures, user agents, the weird custom ones</span></li>
+    <li><b>Raw body</b><span>byte-for-byte, ready to paste into a test</span></li>
+    <li><b>Parsed superglobals</b><span>$_GET, $_POST, $_REQUEST, $_FILES</span></li>
+  </ul>
+  <h3>And the sender gets</h3>
+  <pre data-lang="http 200 · application/json">{
+    <span class="k">"ok"</span>: true,
+    <span class="k">"message"</span>: <span class="s">"Webhook received and forwarded to you@example.com"</span>,
+    <span class="k">"forwarded_to"</span>: <span class="s">"you@example.com"</span>,
+    <span class="k">"parser"</span>: <span class="s">"default"</span>,
+    <span class="k">"subject"</span>: <span class="s">"‼️ Webhook Request Received - 2026-09-11 17:15:42"</span>,
+    <span class="k">"received_at"</span>: <span class="s">"2026-09-11T17:15:42+00:00"</span>,
+    <span class="k">"request"</span>: { <span class="k">"method"</span>: <span class="s">"POST"</span>, <span class="k">"content_type"</span>: <span class="s">"application/json"</span>, <span class="k">"ip"</span>: <span class="s">"203.0.113.7"</span>, <span class="k">"headers"</span>: 9, <span class="k">"body_bytes"</span>: 40 },
+    <span class="k">"data"</span>: {
+        <span class="k">"query"</span>: { <span class="k">"src"</span>: <span class="s">"curl"</span> },
+        <span class="k">"form"</span>: {},
+        <span class="k">"json"</span>: { <span class="k">"event"</span>: <span class="s">"user.created"</span>, <span class="k">"user_id"</span>: 12345 },
+        <span class="k">"files"</span>: []
+    }
+}</pre>
+  <p class="tangent">JSON bodies get decoded and echoed back under <code>data.json</code>, so you can eyeball what the server actually understood. Form fields land in <code>form</code>, query string in <code>query</code>. No print_r in sight.</p>
+  <p class="tangent">Any 200 is enough for most services to mark the delivery as "succeeded" and stop retrying. Which is the point.</p>
+</section>
 
-            <h3 class="mt-4">Email Contents</h3>
-            <p>Within moments, you'll receive a styled HTML email containing:</p>
-            
-            <div class="row mt-3">
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-clock"></i> Request Timestamp</h5>
-                            <p class="card-text">Exact date and time when the webhook was received</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-info-square"></i> Request Information</h5>
-                            <p class="card-text">IP address, HTTP method (GET/POST/etc), and Content-Type</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-list-ul"></i> Request Headers</h5>
-                            <p class="card-text">All HTTP headers sent with the request</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-file-earmark-text"></i> Request Body</h5>
-                            <p class="card-text">Complete raw body content (JSON, XML, form data, etc.)</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-code-slash"></i> PHP Variables</h5>
-                            <p class="card-text">Parsed GET, POST, REQUEST, and FILES superglobals for easy access</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<section id="faq">
+  <h2>Caveats, small print, that sort of thing</h2>
+  <div class="note warn">
+    <p><b>Anyone with the URL can email you.</b> There's no auth. There's no secret. It's your email address in a URL. Use it for debugging and testing. Do not point production payment data at it. Don't make me put a bigger warning here.</p>
+  </div>
+  <h3>Stuff that's true</h3>
+  <ul>
+    <li><b>Nothing is stored.</b> Request comes in, email goes out, request is forgotten. No logs of your payloads, no database, no "insights".</li>
+    <li><b>Output is escaped.</b> Everything is run through <code>htmlspecialchars()</code> before it hits the email, so a malicious payload renders as text, not as a thing.</li>
+    <li><b>Bad email → HTTP 400, as JSON.</b> <code>{"ok": false, "error": "invalid_email", ...}</code> with a hint about <code>%40</code>. Validated with PHP's <code>FILTER_VALIDATE_EMAIL</code>. Boring, correct.</li>
+    <li><b>Failed sends get logged.</b> On the server side, for the person running it. Not for you. Sorry.</li>
+  </ul>
+  <h3>Good for</h3>
+  <div class="chips">
+    <span class="chip">debugging a webhook you didn't write</span>
+    <span class="chip">seeing what Stripe actually sends</span>
+    <span class="chip">capturing real payloads for docs</span>
+    <span class="chip">testing before the handler exists</span>
+    <span class="chip">"is it even firing?"</span>
+    <span class="chip">alerts in your inbox without a whole thing</span>
+  </div>
+</section>
 
-            <div class="alert alert-success mt-4">
-                <i class="bi bi-check-circle"></i> <strong>Subject Line:</strong> Emails arrive with the subject <strong>"‼️ Webhook Request Received - [timestamp]"</strong> for easy filtering and identification.
-            </div>
-        </div>
+<footer>
+  <div>Built with PHP and ADHD medication. Not necessarily in that order.</div>
+  <div>© 2025–2026 Andy Dixon · <a href="https://<?php echo $_SERVER['HTTP_HOST']; ?>/"><?php echo $_SERVER['HTTP_HOST']; ?></a></div>
+</footer>
 
-        <!-- Error Handling Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-exclamation-octagon"></i> Error Handling</h2>
-            
-            <h3>Invalid Email Address</h3>
-            <p>If the email address in the URL is invalid or missing, you'll receive:</p>
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <strong>HTTP 400 Bad Request</strong>
-                </div>
-                <div class="card-body">
-                    <div class="code-block">
-Invalid email address provided in URL path.
-                    </div>
-                </div>
-            </div>
+</div>
 
-            <div class="alert alert-info mt-4">
-                <i class="bi bi-shield-check"></i> <strong>Validation:</strong> The service validates email addresses using PHP's built-in <code>FILTER_VALIDATE_EMAIL</code> filter to ensure proper formatting.
-            </div>
-        </div>
-
-        <!-- Security Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-shield-lock"></i> Security Features</h2>
-            <ul class="lead">
-                <li><strong>Email Validation:</strong> Only valid email addresses are accepted</li>
-                <li><strong>XSS Protection:</strong> All output is sanitized using <code>htmlspecialchars()</code></li>
-                <li><strong>No Data Storage:</strong> Webhook data is forwarded immediately and not stored on the server</li>
-                <li><strong>Error Logging:</strong> Failed email attempts are logged for monitoring</li>
-            </ul>
-
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i> <strong>Privacy Note:</strong> Anyone with your webhook URL can send data to your email address. Only use this service for testing and debugging purposes. Do not use for sensitive production data without additional authentication.
-            </div>
-        </div>
-
-        <!-- Supported Features Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-check2-square"></i> Supported Features</h2>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="bi bi-check-circle text-success"></i> HTTP Methods</h5>
-                    <ul>
-                        <li>GET</li>
-                        <li>POST</li>
-                        <li>PUT</li>
-                        <li>PATCH</li>
-                        <li>DELETE</li>
-                        <li>Any custom method</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <h5><i class="bi bi-check-circle text-success"></i> Content Types</h5>
-                    <ul>
-                        <li>application/json</li>
-                        <li>application/x-www-form-urlencoded</li>
-                        <li>multipart/form-data</li>
-                        <li>text/plain</li>
-                        <li>text/xml</li>
-                        <li>Any custom content type</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- GitHub Webhook Parser Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-github"></i> GitHub Webhook Parser</h2>
-            <p class="lead">Get beautifully formatted emails specifically designed for GitHub webhooks with enhanced event details.</p>
-
-            <h3>How to Use</h3>
-            <p>Simply add <code>/github</code> to the end of your webhook URL:</p>
-            <div class="code-block mb-4">
-https://<?php echo $_SERVER['HTTP_HOST']; ?>/<strong>{email-address}</strong>/github
-            </div>
-
-            <h3>URL Format Examples</h3>
-            <div class="row mt-3 mb-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <strong>Standard Webhook</strong>
-                        </div>
-                        <div class="card-body">
-                            <code><?php echo $_SERVER['HTTP_HOST']; ?>/john%40example.com</code>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <strong>GitHub Webhook</strong>
-                        </div>
-                        <div class="card-body">
-                            <code><?php echo $_SERVER['HTTP_HOST']; ?>/john%40example.com/github</code>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <h3>Supported GitHub Events</h3>
-            <p>The GitHub parser provides enhanced formatting for these event types:</p>
-            
-            <div class="row mt-3">
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">📤 Push Events</h5>
-                            <p class="card-text">Displays branch, commit count, and individual commit messages with authors.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">🔀 Pull Request Events</h5>
-                            <p class="card-text">Shows PR number, title, state, branches, and direct link to the PR.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">📝 Issue Events</h5>
-                            <p class="card-text">Displays issue number, title, state, and link to the issue.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">🚀 Release Events</h5>
-                            <p class="card-text">Shows release tag, name, and direct link to the release page.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="alert alert-info mt-4">
-                <i class="bi bi-lightbulb"></i> <strong>All Events Supported:</strong> Even if an event isn't specifically formatted above, the parser will display it in a clean, structured format showing all webhook data.
-            </div>
-
-            <h3 class="mt-4">Setting Up in GitHub</h3>
-            <p>To configure a GitHub webhook:</p>
-            <ol>
-                <li>Go to your repository settings → Webhooks → Add webhook</li>
-                <li>Set the Payload URL to: <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/your%40email.com/github</code></li>
-                <li>Set Content type to: <strong>application/json</strong></li>
-                <li>Choose which events to receive (or select "Send me everything")</li>
-                <li>Click "Add webhook"</li>
-            </ol>
-
-            <div class="alert alert-success">
-                <i class="bi bi-check-circle"></i> <strong>Subject Line:</strong> GitHub webhook emails arrive with event-specific subject lines like <strong>"📤 GitHub push - username/repo"</strong> or <strong>"🔀 GitHub pull_request (opened) - username/repo"</strong> for easy filtering.
-            </div>
-
-            <div class="alert alert-warning">
-                <i class="bi bi-info-circle"></i> <strong>Tip:</strong> Use email plus addressing like <code>you+github%40example.com</code> to easily filter GitHub webhooks in your inbox.
-            </div>
-        </div>
-
-        <!-- Use Cases Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-star"></i> Common Use Cases</h2>
-            
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-bug"></i> Debugging</h5>
-                            <p class="card-text">See exactly what data third-party services are sending to your webhooks</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-plugin"></i> Integration Testing</h5>
-                            <p class="card-text">Test webhook integrations before implementing full handlers</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-eye"></i> Monitoring</h5>
-                            <p class="card-text">Monitor webhook activity and payload changes over time</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-book"></i> Documentation</h5>
-                            <p class="card-text">Capture real examples for API documentation</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-diagram-3"></i> Development</h5>
-                            <p class="card-text">Quickly test webhook flows during development</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card feature-card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-search"></i> Troubleshooting</h5>
-                            <p class="card-text">Diagnose issues with webhook payloads and headers</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tips Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-lightbulb"></i> Tips & Best Practices</h2>
-            
-            <div class="alert alert-info">
-                <h5><i class="bi bi-envelope-at"></i> Email Filtering</h5>
-                <p class="mb-0">Create an email filter for the subject line "‼️ Webhook Request Received" to organize incoming webhooks in your inbox.</p>
-            </div>
-
-            <div class="alert alert-info">
-                <h5><i class="bi bi-plus-slash-minus"></i> Use Plus Addressing</h5>
-                <p class="mb-0">Use email plus addressing (e.g., <code>yourname+github%40gmail.com</code>) to track which services are sending webhooks.</p>
-            </div>
-
-            <div class="alert alert-info">
-                <h5><i class="bi bi-clock-history"></i> Timestamp in Emails</h5>
-                <p class="mb-0">Check the "Date Received" field in emails to verify webhook timing and debug delivery delays.</p>
-            </div>
-
-            <div class="alert alert-info">
-                <h5><i class="bi bi-code"></i> Parse the Body</h5>
-                <p class="mb-0">The raw body section contains the exact payload - perfect for copying into your code for testing.</p>
-            </div>
-        </div>
-
-        <!-- Quick Start Section -->
-        <div class="doc-container">
-            <h2><i class="bi bi-rocket-takeoff"></i> Quick Start</h2>
-            <p class="lead">Get started in 3 simple steps:</p>
-            
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="card text-center feature-card border-primary">
-                        <div class="card-body">
-                            <div class="display-4 text-primary">1</div>
-                            <h5 class="card-title mt-3">Encode Your Email</h5>
-                            <p class="card-text">Replace <code>@</code> with <code>%40</code> in your email address</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card text-center feature-card border-success">
-                        <div class="card-body">
-                            <div class="display-4 text-success">2</div>
-                            <h5 class="card-title mt-3">Configure Webhook</h5>
-                            <p class="card-text">Use <code><?php echo $_SERVER['HTTP_HOST']; ?>/{your-email}</code> as the webhook URL</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card text-center feature-card border-warning">
-                        <div class="card-body">
-                            <div class="display-4 text-warning">3</div>
-                            <h5 class="card-title mt-3">Check Your Inbox</h5>
-                            <p class="card-text">Receive detailed webhook data instantly in your email</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <h5>Try it now!</h5>
-                <div class="code-block text-start d-inline-block">
-curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/YOUR-EMAIL-HERE \
-  -d '{"test": "Hello World!"}'
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-center text-white mt-5">
-            <p class="mb-1"><i class="bi bi-code-slash"></i> Built with PHP and ADHD medication</p>
-            <p><small>© 2025-2026 Andy Dixon | <a href="https://<?php echo $_SERVER['HTTP_HOST']; ?>/" class="text-white"><?php echo $_SERVER['HTTP_HOST']; ?></a></small></p>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+  var em=document.getElementById('em'),out=document.getElementById('out'),cp=document.getElementById('cp');
+  var ex=document.querySelectorAll('.ex, #ex1');
+  function enc(v){return encodeURIComponent(v.trim()||'you@example.com');}
+  em.addEventListener('input',function(){
+    var e=enc(em.value);out.textContent=e;
+    ex.forEach(function(n){n.textContent=e;});
+  });
+  cp.addEventListener('click',function(){
+    var url=out.parentNode.textContent.replace(/\s+/g,'');
+    var done=function(){cp.textContent='Copied ✓';setTimeout(function(){cp.textContent='Copy';},1400);};
+    if(navigator.clipboard){navigator.clipboard.writeText(url).then(done);}
+    else{var r=document.createRange();r.selectNodeContents(out.parentNode);getSelection().removeAllRanges();getSelection().addRange(r);document.execCommand('copy');done();}
+  });
+})();
+</script>
 </body>
 </html>

@@ -45,9 +45,13 @@ if(empty($email)) {
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     // Set HTTP response code to 400 Bad Request
     http_response_code(400);
-    // Return error message to the client
-    echo 'Invalid email address provided in URL path.';
-    // Terminate script execution
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode([
+        'ok' => false,
+        'error' => 'invalid_email',
+        'message' => 'Invalid email address provided in URL path.',
+        'hint' => 'Encode @ as %40, e.g. /you%40example.com',
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\n";
     exit;
 }
 
@@ -98,7 +102,7 @@ $variables = [
 
 // Convert the variables array to a human-readable string format
 // The second parameter (true) makes print_r return the output instead of printing it
-$variablesText = print_r($variables, true);
+$variablesText = json_encode($variables, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
 // Sanitise the variables text for HTML output
 $variablesTextSafe = htmlspecialchars($variablesText, ENT_QUOTES, 'UTF-8');
@@ -141,128 +145,9 @@ if ($parserName) {
 if (empty($html)) {
     // Construct the HTML email body using a heredoc string for better readability
     // This creates a styled HTML email with all webhook details
-    $html = <<<HTML
-<!DOCTYPE html>
-<html lang="en-GB">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webhook Request Received</title>
-    <style>
-        /* Gmail-safe reset and main styling */
-        body {
-            background-color: #ffffff;
-            color: #1a1a1a;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
-        /* Container for better email client compatibility */
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        /* Header styling with elegant separator */
-        .header {
-            text-align: center;
-            padding-bottom: 30px;
-            border-bottom: 3px solid #000000;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            color: #000000;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            letter-spacing: -0.5px;
-        }
-        .header .timestamp {
-            color: #666666;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0;
-        }
-        /* Section styling with elegant typography */
-        .section {
-            margin-bottom: 35px;
-        }
-        .section-title {
-            color: #000000;
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-            letter-spacing: -0.3px;
-        }
-        /* Data display with subtle borders */
-        .data-box {
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            padding: 16px 20px;
-            margin: 0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #2a2a2a;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-x: auto;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        /* Metadata grid for clean information display */
-        .metadata {
-            display: table;
-            width: 100%;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        .metadata-row {
-            display: table-row;
-        }
-        .metadata-row:not(:last-child) .metadata-label,
-        .metadata-row:not(:last-child) .metadata-value {
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .metadata-label {
-            display: table-cell;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: #000000;
-            width: 35%;
-            vertical-align: top;
-            font-size: 14px;
-        }
-        .metadata-value {
-            display: table-cell;
-            padding: 12px 16px;
-            color: #333333;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-            font-size: 13px;
-            vertical-align: top;
-        }
-        /* Footer styling */
-        .footer {
-            margin-top: 50px;
-            padding-top: 25px;
-            border-top: 2px solid #e0e0e0;
-            text-align: center;
-            color: #888888;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Email Header -->
-        <div class="header">
-            <h1>⚡ Webhook Request Received</h1>
-            <p class="timestamp">$dateReceivedSafe</p>
-        </div>
+    $emailTitle = "⚡ Webhook Request Received";
+    $emailStamp = "$dateReceivedSafe";
+    $body = <<<HTML
 
         <!-- Request Information Section -->
         <div class="section">
@@ -297,18 +182,13 @@ if (empty($html)) {
 
         <!-- PHP Variables Section -->
         <div class="section">
-            <div class="section-title">🔧 PHP Variables</div>
+            <div class="section-title">🔧 Parsed Variables</div>
             <pre class="data-box">$variablesTextSafe</pre>
         </div>
 
         <!-- Footer -->
-        <div class="footer">
-            <p>This webhook was automatically forwarded to your email address.</p>
-        </div>
-    </div>
-</body>
-</html>
 HTML;
+    $html = emailShell($emailTitle, $emailStamp, $body, "This webhook was automatically forwarded to your email address.");
 
     // Construct the email subject line with an attention-grabbing emoji and timestamp
     $subject = "‼️ Webhook Request Received - $dateReceived";
@@ -333,13 +213,30 @@ if (!$mailSent) {
     error_log("Failed to send webhook email to: $email");
 }
 
-// Set the Content-Type header for the HTTP response to plain text
-header('Content-Type: text/plain; charset=UTF-8');
+// JSON acknowledgement back to the webhook sender
+header('Content-Type: application/json; charset=UTF-8');
 
-// Return a simple acknowledgement to the webhook sender
-// This confirms the webhook was received and processed
-echo "Webhook received and forwarded to: $email\n\n";
+// Decode JSON bodies so the caller sees what we understood, not a raw string
+$bodyJson = ($rawBody !== '' && str_contains($contentType, 'json')) ? json_decode($rawBody, true) : null;
 
-// Include a sanitised copy of the REQUEST data in the response for debugging
-echo "Request data:\n";
-print_r($_REQUEST);
+echo json_encode([
+    'ok' => true,
+    'message' => "Webhook received and forwarded to $email",
+    'forwarded_to' => $email,
+    'parser' => $parserName ?: 'default',
+    'subject' => $subject,
+    'received_at' => date('c'),
+    'request' => [
+        'method' => $requestMethod,
+        'content_type' => $contentType,
+        'ip' => $ipAddress,
+        'headers' => count($headersArray),
+        'body_bytes' => strlen($rawBody),
+    ],
+    'data' => [
+        'query' => (object) $_GET,
+        'form' => (object) $_POST,
+        'json' => $bodyJson,
+        'files' => array_keys($_FILES),
+    ],
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\n";
