@@ -319,12 +319,13 @@ HTML;
 $emailHeaders = "MIME-Version: 1.0\r\n";
 // Content-type specifies HTML email with UTF-8 character encoding
 $emailHeaders .= "Content-type: text/html; charset=UTF-8\r\n";
-// From header sets the sender address to a no-reply address at wh.dixon.cx
-$emailHeaders .= "From: no-reply@wh.dixon.cx\r\n";
+// Keep both the visible sender and SMTP envelope sender on the public domain.
+$envelopeSender = 'no-reply@dixon.cx';
+$emailHeaders .= "From: Webhook Call <$envelopeSender>\r\n";
 
 // Send the email using PHP's built-in mail function
-// Parameters: recipient, subject, message body, headers
-$mailSent = mail($email, $subject, $html, $emailHeaders);
+// The -f option prevents sendmail from deriving www-data@<container-hostname>.
+$mailSent = mail($email, $subject, $html, $emailHeaders, '-f' . $envelopeSender);
 
 // Check if the email was sent successfully
 if (!$mailSent) {
