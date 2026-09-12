@@ -28,20 +28,20 @@ function jsonParse($rawBody, $headers, $metadata) {
 
         <div class="section">
             <div class="section-title">📋 Request Information</div>
-            <div class="metadata">
-                <div class="metadata-row">
-                    <div class="metadata-label">IP Address</div>
-                    <div class="metadata-value">$ipSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Method</div>
-                    <div class="metadata-value">$methodSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Content-Type</div>
-                    <div class="metadata-value">$contentTypeSafe</div>
-                </div>
-            </div>
+            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td class="metadata-label">IP Address</td>
+                    <td class="metadata-value">$ipSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Method</td>
+                    <td class="metadata-value">$methodSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Content-Type</td>
+                    <td class="metadata-value">$contentTypeSafe</td>
+                </tr>
+            </table>
         </div>
 
         <div class="section">
@@ -78,7 +78,7 @@ function renderJsonData($data, $path = '') {
     
     if (!is_array($data)) {
         $safe = htmlspecialchars((string)$data, ENT_QUOTES, 'UTF-8');
-        return "<div class=\"metadata-value\">$safe</div>";
+        return "<div class=\"simple-value\">$safe</div>";
     }
     
     // Check if it's an indexed array (numeric keys in sequence)
@@ -110,18 +110,18 @@ function renderJsonData($data, $path = '') {
                     
                     $html .= '<div class="array-item">';
                     $html .= '<div class="array-item-title">Item ' . ($index + 1) . '</div>';
-                    $html .= '<div class="metadata">';
+                    $html .= '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                     
                     foreach ($simpleData as $key => $value) {
                         $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                         $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-                        $html .= '<div class="metadata-row">';
-                        $html .= '<div class="metadata-label">' . $keySafe . '</div>';
-                        $html .= '<div class="metadata-value">' . $valueSafe . '</div>';
-                        $html .= '</div>';
+                        $html .= '<tr>';
+                        $html .= '<td class="metadata-label">' . $keySafe . '</td>';
+                        $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
+                        $html .= '</tr>';
                     }
                     
-                    $html .= '</div>';
+                    $html .= '</table>';
                     $html .= '</div>';
                 }
                 
@@ -133,12 +133,12 @@ function renderJsonData($data, $path = '') {
             } else {
                 // Simple value in array
                 $valueSafe = htmlspecialchars((string)$item, ENT_QUOTES, 'UTF-8');
-                $html .= '<div class="metadata">';
-                $html .= '<div class="metadata-row">';
-                $html .= '<div class="metadata-label">Item ' . ($index + 1) . '</div>';
-                $html .= '<div class="metadata-value">' . $valueSafe . '</div>';
-                $html .= '</div>';
-                $html .= '</div>';
+                $html .= '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
+                $html .= '<tr>';
+                $html .= '<td class="metadata-label">Item ' . ($index + 1) . '</td>';
+                $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
+                $html .= '</tr>';
+                $html .= '</table>';
             }
         }
     } else {
@@ -161,18 +161,18 @@ function renderJsonData($data, $path = '') {
                 $html .= '<div class="path-title">' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '</div>';
             }
             
-            $html .= '<div class="metadata">';
+            $html .= '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             
             foreach ($simpleData as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                 $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-                $html .= '<div class="metadata-row">';
-                $html .= '<div class="metadata-label">' . $keySafe . '</div>';
-                $html .= '<div class="metadata-value">' . $valueSafe . '</div>';
-                $html .= '</div>';
+                $html .= '<tr>';
+                $html .= '<td class="metadata-label">' . $keySafe . '</td>';
+                $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
+                $html .= '</tr>';
             }
             
-            $html .= '</div>';
+            $html .= '</table>';
         }
         
         // Recursively render sub-arrays as separate tables with path titles

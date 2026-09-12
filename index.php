@@ -152,20 +152,20 @@ if (empty($html)) {
         <!-- Request Information Section -->
         <div class="section">
             <div class="section-title">📋 Request Information</div>
-            <div class="metadata">
-                <div class="metadata-row">
-                    <div class="metadata-label">IP Address</div>
-                    <div class="metadata-value">$ipAddressSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Method</div>
-                    <div class="metadata-value">$requestMethodSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Content-Type</div>
-                    <div class="metadata-value">$contentTypeSafe</div>
-                </div>
-            </div>
+            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td class="metadata-label">IP Address</td>
+                    <td class="metadata-value">$ipAddressSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Method</td>
+                    <td class="metadata-value">$requestMethodSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Content-Type</td>
+                    <td class="metadata-value">$contentTypeSafe</td>
+                </tr>
+            </table>
         </div>
 
         <!-- Request Headers Section -->

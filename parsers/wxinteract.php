@@ -88,16 +88,16 @@ function wxinteractParse($rawBody, $headers, $metadata) {
 
         <div class="section">
             <div class="section-title">📋 Event Information</div>
-            <div class="metadata">
-                <div class="metadata-row">
-                    <div class="metadata-label">Event Type</div>
-                    <div class="metadata-value">$statusSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">IP Address</div>
-                    <div class="metadata-value">$ipSafe</div>
-                </div>
-            </div>
+            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td class="metadata-label">Event Type</td>
+                    <td class="metadata-value">$statusSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">IP Address</td>
+                    <td class="metadata-value">$ipSafe</td>
+                </tr>
+            </table>
         </div>
 
         $eventContent
@@ -126,28 +126,28 @@ function buildOutboundSmsSubmittedContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">📤 SMS Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">To</div>
-                <div class="metadata-value">$to</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">From</div>
-                <div class="metadata-value">$from</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Campaign ID</div>
-                <div class="metadata-value">$campaignId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Submitted At</div>
-                <div class="metadata-value">$submittedAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">To</td>
+                <td class="metadata-value">$to</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">From</td>
+                <td class="metadata-value">$from</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Campaign ID</td>
+                <td class="metadata-value">$campaignId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Submitted At</td>
+                <td class="metadata-value">$submittedAt</td>
+            </tr>
+        </table>
     </div>
     
     <div class="section">
@@ -170,28 +170,28 @@ function buildOutboundSmsDeliveredContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">✅ Delivery Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">To</div>
-                <div class="metadata-value">$to</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">From</div>
-                <div class="metadata-value">$from</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Campaign ID</div>
-                <div class="metadata-value">$campaignId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Delivered At</div>
-                <div class="metadata-value">$deliveredAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">To</td>
+                <td class="metadata-value">$to</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">From</td>
+                <td class="metadata-value">$from</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Campaign ID</td>
+                <td class="metadata-value">$campaignId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Delivered At</td>
+                <td class="metadata-value">$deliveredAt</td>
+            </tr>
+        </table>
     </div>
 HTML;
 }
@@ -211,28 +211,28 @@ function buildOutboundSmsFailedContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">❌ Failure Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">To</div>
-                <div class="metadata-value">$to</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">From</div>
-                <div class="metadata-value">$from</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Campaign ID</div>
-                <div class="metadata-value">$campaignId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Failed At</div>
-                <div class="metadata-value">$failedAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">To</td>
+                <td class="metadata-value">$to</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">From</td>
+                <td class="metadata-value">$from</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Campaign ID</td>
+                <td class="metadata-value">$campaignId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Failed At</td>
+                <td class="metadata-value">$failedAt</td>
+            </tr>
+        </table>
     </div>
     
     <div class="section">
@@ -261,36 +261,36 @@ function buildShortlinkClickedContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">🔗 Click Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Shortlink</div>
-                <div class="metadata-value"><a href="$shortlink" style="color: #7c3aed;">$shortlink</a></div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Original URL</div>
-                <div class="metadata-value"><a href="$originalUrl" style="color: #7c3aed;">$originalUrl</a></div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Phone Number</div>
-                <div class="metadata-value">$phoneNumber</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Campaign ID</div>
-                <div class="metadata-value">$campaignId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Clicked At</div>
-                <div class="metadata-value">$clickedAt</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">IP Address</div>
-                <div class="metadata-value">$ipAddress</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Shortlink</td>
+                <td class="metadata-value"><a href="$shortlink" style="color: #7c3aed;">$shortlink</a></td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Original URL</td>
+                <td class="metadata-value"><a href="$originalUrl" style="color: #7c3aed;">$originalUrl</a></td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Phone Number</td>
+                <td class="metadata-value">$phoneNumber</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Campaign ID</td>
+                <td class="metadata-value">$campaignId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Clicked At</td>
+                <td class="metadata-value">$clickedAt</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">IP Address</td>
+                <td class="metadata-value">$ipAddress</td>
+            </tr>
+        </table>
     </div>
     
     <div class="section">
@@ -314,28 +314,28 @@ function buildInboundSmsContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">📥 Inbound SMS Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">From</div>
-                <div class="metadata-value">$from</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">To</div>
-                <div class="metadata-value">$to</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Keyword</div>
-                <div class="metadata-value">$keyword</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Received At</div>
-                <div class="metadata-value">$receivedAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">From</td>
+                <td class="metadata-value">$from</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">To</td>
+                <td class="metadata-value">$to</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Keyword</td>
+                <td class="metadata-value">$keyword</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Received At</td>
+                <td class="metadata-value">$receivedAt</td>
+            </tr>
+        </table>
     </div>
     
     <div class="section">
@@ -358,28 +358,28 @@ function buildOptOutContent($data) {
     return <<<HTML
     <div class="section">
         <div class="section-title">🚫 Opt Out Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Phone Number</div>
-                <div class="metadata-value">$phoneNumber</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">From Number</div>
-                <div class="metadata-value">$from</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Keyword</div>
-                <div class="metadata-value">$keyword</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Message ID</div>
-                <div class="metadata-value">$messageId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Opt Out At</div>
-                <div class="metadata-value">$optOutAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Phone Number</td>
+                <td class="metadata-value">$phoneNumber</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">From Number</td>
+                <td class="metadata-value">$from</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Keyword</td>
+                <td class="metadata-value">$keyword</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Message ID</td>
+                <td class="metadata-value">$messageId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Opt Out At</td>
+                <td class="metadata-value">$optOutAt</td>
+            </tr>
+        </table>
     </div>
 HTML;
 }
@@ -399,57 +399,57 @@ function buildContactsCallbackContent($data) {
     
     $customFieldsHtml = '';
     if (isset($data['custom_fields']) && is_array($data['custom_fields']) && !empty($data['custom_fields'])) {
-        $customFieldsHtml = '<div class="section"><div class="section-title">🏷️  Custom Fields</div><div class="metadata">';
+        $customFieldsHtml = '<div class="section"><div class="section-title">🏷️  Custom Fields</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
         foreach ($data['custom_fields'] as $key => $value) {
             $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
             $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             $customFieldsHtml .= <<<HTML
-            <div class="metadata-row">
-                <div class="metadata-label">$keySafe</div>
-                <div class="metadata-value">$valueSafe</div>
-            </div>
+            <tr>
+                <td class="metadata-label">$keySafe</td>
+                <td class="metadata-value">$valueSafe</td>
+            </tr>
 HTML;
         }
-        $customFieldsHtml .= '</div></div>';
+        $customFieldsHtml .= '</table></div>';
     }
     
     return <<<HTML
     <div class="section">
         <div class="section-title">👤 Contact Details</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Contact ID</div>
-                <div class="metadata-value">$contactId</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Phone Number</div>
-                <div class="metadata-value">$phoneNumber</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">First Name</div>
-                <div class="metadata-value">$firstName</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Last Name</div>
-                <div class="metadata-value">$lastName</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Email</div>
-                <div class="metadata-value">$email</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Status</div>
-                <div class="metadata-value">$status</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Created At</div>
-                <div class="metadata-value">$createdAt</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Updated At</div>
-                <div class="metadata-value">$updatedAt</div>
-            </div>
-        </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Contact ID</td>
+                <td class="metadata-value">$contactId</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Phone Number</td>
+                <td class="metadata-value">$phoneNumber</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">First Name</td>
+                <td class="metadata-value">$firstName</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Last Name</td>
+                <td class="metadata-value">$lastName</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Email</td>
+                <td class="metadata-value">$email</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Status</td>
+                <td class="metadata-value">$status</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Created At</td>
+                <td class="metadata-value">$createdAt</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Updated At</td>
+                <td class="metadata-value">$updatedAt</td>
+            </tr>
+        </table>
     </div>
     
     $customFieldsHtml
