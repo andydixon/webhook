@@ -1,6 +1,6 @@
 # Webhook Email Forwarder
 
-A simple, elegant PHP solution for debugging webhooks by forwarding them directly to your email.
+A single-binary Go service for debugging webhooks by forwarding them directly to your email.
 
 ## 🌟 Features
 
@@ -176,7 +176,7 @@ See also the [Webex Interact Guide](WEBEX_INTERACT_GUIDE.md).
 
 ### Creating Your Own Parser
 
-A parser is one file in `parsers/` exposing `{name}Parse($rawBody, $headers, $metadata)` that returns `['html' => ..., 'subject' => ...]` or `false`. Build the body from `.section`, `table.metadata`, and `.data-box` blocks, escape free text with `esc()`, and wrap it with `emailShell()` from `parsers/helpers.php` so it picks up the shared design. See the [Parser Development Guide](PARSER_PROMPT.md) for details.
+A parser is one Go function of type `Parser` in `parser_{name}.go`, registered in the `parsers` map in `main.go`. Build the body with `section`, `table`, and `row`, escape free text with `esc`, and wrap it with `emailShell` so it picks up the shared design. See the [Parser Development Guide](PARSER_PROMPT.md) for details.
 
 ---
 
@@ -298,23 +298,41 @@ Hello! Your appointment is confirmed for tomorrow at 2 PM.
 
 ## 📦 Installation
 
-1. Clone the repository:
+### Run the binary
+
 ```bash
 git clone https://github.com/andydixon/webhook.git
+cd webhook
+go build -o webhooks .
+LISTEN=127.0.0.1:8080 SMTP_ADDR=127.0.0.1:25 MAIL_FROM=no-reply@example.com ./webhooks
 ```
 
-2. Upload the files to your web server (ensure PHP is installed and configured)
+Put a reverse proxy (nginx, Caddy) in front for TLS. The service reads `X-Real-IP` / `X-Forwarded-For` from a private-address proxy to report the real client IP.
 
-3. Ensure the web server has permission to send emails (PHP `mail()` function)
+### Run the container
 
-4. Access the root URL to view the documentation page
+```bash
+docker build -t webhooks.dixon.cx:latest .
+docker run --rm -p 127.0.0.1:29593:8080 webhooks.dixon.cx:latest
+```
+
+The image is a static binary on `distroless`, runs as non-root, listens on `:8080`, and relays mail to `172.17.0.1:25` (the Docker host's SMTP server) by default. `deploy/webhooks.dixon.cx.service` is the systemd unit used in production.
+
+### Configuration
+
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `LISTEN` | `127.0.0.1:8080` | Address to listen on (`:8080` in the container) |
+| `SMTP_ADDR` | `127.0.0.1:25` | SMTP relay, no auth or TLS (`172.17.0.1:25` in the container) |
+| `MAIL_FROM` | `no-reply@dixon.cx` | Envelope and From address |
+| `PUBLIC_HOST` | `webhooks.dixon.cx` | Host shown in email footers |
+
+`/healthz` returns `ok`, and `webhooks -check` exits non-zero if a running instance is unhealthy (used by the image's `HEALTHCHECK`).
 
 ## 🔧 Requirements
 
-- PHP 8.0 or higher
-- Web server (Apache, Nginx, etc.)
-- PHP `mail()` function enabled
-- Outbound SMTP/email capability
+- Go 1.24 or newer to build (no third-party dependencies), or Docker
+- An SMTP server that accepts mail from the service's address
 
 ## 📧 What You Receive
 
@@ -331,7 +349,7 @@ The standard (no parser) email contains:
 ## 🔒 Security Features
 
 - **Email Validation**: Only valid email addresses are accepted
-- **XSS Protection**: All output is escaped with `htmlspecialchars()`; free-text values go through `esc()`, which also preserves line breaks
+- **XSS Protection**: All output is HTML-escaped; free-text values go through `esc`, which also preserves line breaks
 - **No Data Storage**: Webhook data is forwarded immediately and not stored
 - **Error Logging**: Failed email attempts are logged for monitoring
 
@@ -388,6 +406,12 @@ If the email address in the URL is invalid or missing, you get a `400 Bad Reques
 ### Unknown Parser or Unparseable Payload
 The request still succeeds. The email uses the standard raw format and the response reports the parser name you asked for.
 
+### Mail Delivery Failure
+If the SMTP relay rejects the message you get a `502` with `"error": "mail_failed"`, so the sending service will retry rather than believe the webhook was delivered.
+
+### Body Too Large
+Bodies over 10 MB get a `413` with `"error": "body_too_large"`.
+
 ## 📄 License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
@@ -407,6 +431,14 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 Give a ⭐️ if this project helped you!
 
 ## 📜 Version History
+
+- **3.0.0** - Go Rewrite
+  - ♻️ The whole service is now a single Go binary with no dependencies; PHP, Apache, and `.htaccess` are gone
+  - 🐳 Static `distroless` image, non-root, built-in health check
+  - 📧 Mail goes over SMTP with a quoted-printable body and an RFC 2047 subject, so emoji subjects survive every relay
+  - 🔁 A failed send returns `502 mail_failed` instead of a false `200`
+  - 🧪 `go test ./...` covers routing, the JSON response, IP forwarding, and every parser
+  - Email output and the JSON response are byte-for-byte compatible with 2.1.0, with JSON object keys kept in sender order
 
 - **2.1.0** - JSON Response and Email Redesign
   - ✨ **NEW**: Structured JSON response for every request, including errors
@@ -432,4 +464,4 @@ Give a ⭐️ if this project helped you!
 
 ---
 
-Built with PHP and ADHD medication 💊
+Built with Go and ADHD medication 💊

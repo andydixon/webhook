@@ -1,0 +1,16 @@
+[Unit]
+Description=webhooks.dixon.cx (docker container)
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker rm -f webhooks.dixon.cx
+ExecStart=/usr/bin/docker run --rm --memory 256m --cpus 1.0 --pids-limit 128 --name webhooks.dixon.cx -p 127.0.0.1:29593:8080 webhooks.dixon.cx:latest
+ExecStop=/usr/bin/docker stop -t 30 webhooks.dixon.cx
+
+[Install]
+WantedBy=multi-user.target

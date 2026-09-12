@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook → Email | <?php echo $_SERVER['HTTP_HOST']; ?></title>
+<title>Webhook → Email | {{.Host}}</title>
 <meta name="description" content="Point any webhook at a URL with your email in it. Get the whole request in your inbox. That's it. That's the product.">
 <style>
 :root{
@@ -137,7 +137,7 @@ footer a{color:var(--muted)}
     <label for="em">Type your email → get your URL</label>
     <input id="em" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false">
     <div class="url">
-      <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/<b id="out">you%40example.com</b></code>
+      <code>https://{{.Host}}/<b id="out">you%40example.com</b></code>
       <button class="copy" id="cp">Copy</button>
     </div>
     <p class="hint">Yes the <code>@</code> becomes <code>%40</code>. Yes that's the whole trick. Add <code>/github</code>, <code>/json</code>, etc. on the end for the fancy parsers — more on that below, if you scroll that far.</p>
@@ -154,7 +154,7 @@ footer a{color:var(--muted)}
   </div>
 
   <h3>The fastest possible test</h3>
-  <pre data-lang="bash">curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s" id="ex1">you%40example.com</span> \
+  <pre data-lang="bash">curl -X POST https://{{.Host}}/<span class="s" id="ex1">you%40example.com</span> \
   -d '{"test": "hello, is this thing on"}'</pre>
   <p class="tangent">(the email will arrive before you've alt-tabbed back. probably. depends on your mail server. anyway.)</p>
 </section>
@@ -164,14 +164,14 @@ footer a{color:var(--muted)}
   <p class="sub">Any method, any content type. GET, POST, PUT, PATCH, DELETE, something you made up. JSON, form data, multipart, XML, plain text, a string of emoji. It all gets forwarded.</p>
   <div class="stack">
 <pre data-lang="bash"><span class="h"># JSON</span>
-curl -X POST https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s ex">you%40example.com</span> \
+curl -X POST https://{{.Host}}/<span class="s ex">you%40example.com</span> \
   -H "Content-Type: application/json" \
   -d '{"event": "user.created", "user_id": 12345}'
 
 <span class="h"># GET with query string (yes, this works too)</span>
-curl "https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s ex">you%40example.com</span>?event=test&id=123"</pre>
+curl "https://{{.Host}}/<span class="s ex">you%40example.com</span>?event=test&id=123"</pre>
 
-<pre data-lang="javascript"><span class="k">fetch</span>(<span class="s">'https://<?php echo $_SERVER['HTTP_HOST']; ?>/'</span> + <span class="k">encodeURIComponent</span>(<span class="s">'you@example.com'</span>), {
+<pre data-lang="javascript"><span class="k">fetch</span>(<span class="s">'https://{{.Host}}/'</span> + <span class="k">encodeURIComponent</span>(<span class="s">'you@example.com'</span>), {
   method: <span class="s">'POST'</span>,
   headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
   body: JSON.stringify({ event: <span class="s">'order.completed'</span>, order_id: <span class="s">'ORD-789'</span>, total: 99.99 })
@@ -181,7 +181,7 @@ curl "https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="s ex">you%40exam
 <span class="k">from</span> urllib.parse <span class="k">import</span> quote
 
 requests.post(
-    <span class="s">f'https://<?php echo $_SERVER['HTTP_HOST']; ?>/{quote("you@example.com")}'</span>,
+    <span class="s">f'https://{{.Host}}/{quote("you@example.com")}'</span>,
     json={<span class="s">'event'</span>: <span class="s">'payment.received'</span>, <span class="s">'amount'</span>: 250.00},
     headers={<span class="s">'X-Custom-Header'</span>: <span class="s">'MyValue'</span>},
 )</pre>
@@ -204,7 +204,7 @@ requests.post(
   <h3>Setting up GitHub, since that's the one everyone asks about</h3>
   <ol>
     <li>Repo → Settings → Webhooks → Add webhook</li>
-    <li>Payload URL: <code>https://<?php echo $_SERVER['HTTP_HOST']; ?>/<span class="ex">you%40example.com</span>/github</code></li>
+    <li>Payload URL: <code>https://{{.Host}}/<span class="ex">you%40example.com</span>/github</code></li>
     <li>Content type: <code>application/json</code></li>
     <li>Pick events (or "Send me everything", live a little)</li>
     <li>Save. Push something. Refresh inbox. Refresh again. There it is.</li>
@@ -266,8 +266,8 @@ requests.post(
 </section>
 
 <footer>
-  <div>Built with PHP and ADHD medication. Not necessarily in that order.</div>
-  <div>© 2025–2026 Andy Dixon · <a href="https://<?php echo $_SERVER['HTTP_HOST']; ?>/"><?php echo $_SERVER['HTTP_HOST']; ?></a></div>
+  <div>Built with Go and ADHD medication. Not necessarily in that order.</div>
+  <div>© 2025–2026 Andy Dixon · <a href="https://{{.Host}}/">{{.Host}}</a></div>
 </footer>
 
 </div>
