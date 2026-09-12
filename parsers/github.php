@@ -14,9 +14,10 @@ function githubParse($rawBody, $headers, $metadata) {
         return false;
     }
     
-    // Determine event type from headers
-    $event = $headers['X-GitHub-Event'] ?? $headers['X-Github-Event'] ?? 'Unknown';
-    $delivery = $headers['X-GitHub-Delivery'] ?? $headers['X-Github-Delivery'] ?? 'Unknown';
+    // Header names arrive lowercase over HTTP/2, so match case-insensitively
+    $headers = array_change_key_case($headers, CASE_LOWER);
+    $event = $headers['x-github-event'] ?? 'Unknown';
+    $delivery = $headers['x-github-delivery'] ?? 'Unknown';
     
     // Extract common data
     $action = $payload['action'] ?? null;
