@@ -4,6 +4,13 @@
  */
 
 /**
+ * Escape a free-text value for an HTML cell, keeping line breaks.
+ */
+function esc($value) {
+    return nl2br(htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'), false);
+}
+
+/**
  * Helper function to render nested arrays/objects as HTML tables
  * 
  * @param array $data The data to render
@@ -18,7 +25,7 @@ function renderDataAsTable($data, $depth = 0) {
     $html = '';
     
     if (!is_array($data)) {
-        $safe = htmlspecialchars((string)$data, ENT_QUOTES, 'UTF-8');
+        $safe = esc($data);
         return "<div class=\"simple-value\">$safe</div>";
     }
     
@@ -43,7 +50,7 @@ function renderDataAsTable($data, $depth = 0) {
                         $html .= '</td>';
                         $html .= '</tr>';
                     } else {
-                        $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+                        $valueSafe = esc($value);
                         $html .= '<tr>';
                         $html .= '<td class="metadata-label">' . $keySafe . '</td>';
                         $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
@@ -53,7 +60,7 @@ function renderDataAsTable($data, $depth = 0) {
                 $html .= '</table>';
                 $html .= '</div>';
             } else {
-                $valueSafe = htmlspecialchars((string)$item, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($item);
                 $html .= '<div class="array-item-simple">• ' . $valueSafe . '</div>';
             }
         }
@@ -77,7 +84,7 @@ function renderDataAsTable($data, $depth = 0) {
                 $html .= '<td class="metadata-value"><em>empty</em></td>';
                 $html .= '</tr>';
             } else {
-                $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($value);
                 $html .= '<tr>';
                 $html .= '<td class="metadata-label">' . $keySafe . '</td>';
                 $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
@@ -139,6 +146,10 @@ function emailShell($title, $stamp, $body, $footer = 'Automatically forwarded to
   .array-item-title { font-size:14px; font-weight:800; margin:0 0 10px; color:#15151f; letter-spacing:-.01em; }
   .array-item-simple { margin:0 0 6px; padding:9px 14px; background:#f8f7fd; border:1px solid #e6e3f2; border-radius:10px; font-size:14px; }
   .simple-value { font-size:14px; padding:4px 0; }
+  .commit-item { margin:0 0 10px; padding:12px 14px; background:#f8f7fd; border:1px solid #e6e3f2; border-radius:12px; }
+  .commit-item .sha { display:inline-block; font-family:$mono; font-size:12px; font-weight:700; color:#be185d; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:999px; padding:2px 9px; text-decoration:none; }
+  .commit-item .who { font-size:12px; color:#6b6b80; margin-left:6px; }
+  .commit-item .msg { margin-top:6px; font-size:14px; line-height:1.5; color:#15151f; }
   .message-box { margin:12px 0; padding:16px 18px 16px 20px; background:#f8f7fd; border-left:4px solid #8b5cf6; border-radius:0 12px 12px 0; font-size:16px; line-height:1.55; color:#15151f; }
   .error-box { margin:12px 0; padding:12px 14px; background:#fef2f2; border-left:4px solid #ef4444; border-radius:0 10px 10px 0; }
   .footer { padding:22px 34px 8px; text-align:center; color:#6a6a86; font-family:$mono; font-size:11px; letter-spacing:.06em; line-height:1.8; }

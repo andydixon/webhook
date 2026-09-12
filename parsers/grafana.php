@@ -95,7 +95,7 @@ HTML;
             $labelsContent .= '<div class="subsection-title">Group Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             foreach ($groupLabels as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($value);
                 $labelsContent .= <<<HTML
                 <tr>
                     <td class="metadata-label">$keySafe</td>
@@ -110,7 +110,7 @@ HTML;
             $labelsContent .= '<div class="subsection-title">Common Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             foreach ($commonLabels as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($value);
                 $labelsContent .= <<<HTML
                 <tr>
                     <td class="metadata-label">$keySafe</td>
@@ -130,7 +130,7 @@ HTML;
         $annotationsContent .= '<div class="section"><div class="section-title">Common Annotations</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
         foreach ($commonAnnotations as $key => $value) {
             $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-            $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+            $valueSafe = esc($value);
             $annotationsContent .= <<<HTML
             <tr>
                 <td class="metadata-label">$keySafe</td>
@@ -180,7 +180,7 @@ HTML;
                 $alertsContent .= '</table><div class="subsection-title">Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                 foreach ($alertLabels as $key => $value) {
                     $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                    $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                    $valueSafe = esc($value);
                     $alertsContent .= <<<HTML
                     <tr>
                         <td class="metadata-label">$keySafe</td>
@@ -196,7 +196,7 @@ HTML;
                 $alertsContent .= '</table><div class="subsection-title">Annotations</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                 foreach ($alertAnnotations as $key => $value) {
                     $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                    $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                    $valueSafe = esc($value);
                     $alertsContent .= <<<HTML
                     <tr>
                         <td class="metadata-label">$keySafe</td>

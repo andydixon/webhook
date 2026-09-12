@@ -11,7 +11,7 @@
  */
 function jsonParse($rawBody, $headers, $metadata) {
     $payload = json_decode($rawBody, true);
-    if (!$payload || !is_array($payload)) {
+    if (json_last_error() !== JSON_ERROR_NONE) {
         return false;
     }
     
@@ -77,15 +77,30 @@ function renderJsonData($data, $path = '') {
     $html = '';
     
     if (!is_array($data)) {
-        $safe = htmlspecialchars((string)$data, ENT_QUOTES, 'UTF-8');
-        return "<div class=\"simple-value\">$safe</div>";
+        // Scalar (or null): one-row table so it lines up with everything else
+        $label = htmlspecialchars($path ?: 'value', ENT_QUOTES, 'UTF-8');
+        $safe = esc(is_string($data) ? $data : json_encode($data));
+        return '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">'
+             . '<tr><td class="metadata-label">' . $label . '</td><td class="metadata-value">' . $safe . '</td></tr></table>';
     }
     
     // Check if it's an indexed array (numeric keys in sequence)
     $isIndexedArray = array_keys($data) === range(0, count($data) - 1);
     
     if ($isIndexedArray && count($data) > 0) {
-        // It's an array of items
+        // Array of plain values: one table under a single breadcrumb
+        if (!array_filter($data, 'is_array')) {
+            if ($path) {
+                $html .= '<div class="path-title">' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '</div>';
+            }
+            $html .= '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
+            foreach ($data as $index => $item) {
+                $html .= '<tr><td class="metadata-label">Item ' . ($index + 1) . '</td><td class="metadata-value">' . esc($item) . '</td></tr>';
+            }
+            return $html . '</table>';
+        }
+
+        // Array of objects
         foreach ($data as $index => $item) {
             $itemPath = $path ? $path . '->[' . $index . ']' : '[' . $index . ']';
             
@@ -114,7 +129,7 @@ function renderJsonData($data, $path = '') {
                     
                     foreach ($simpleData as $key => $value) {
                         $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                        $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+                        $valueSafe = esc($value);
                         $html .= '<tr>';
                         $html .= '<td class="metadata-label">' . $keySafe . '</td>';
                         $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
@@ -132,7 +147,7 @@ function renderJsonData($data, $path = '') {
                 }
             } else {
                 // Simple value in array
-                $valueSafe = htmlspecialchars((string)$item, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($item);
                 $html .= '<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                 $html .= '<tr>';
                 $html .= '<td class="metadata-label">Item ' . ($index + 1) . '</td>';
@@ -165,7 +180,7 @@ function renderJsonData($data, $path = '') {
             
             foreach ($simpleData as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-                $valueSafe = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+                $valueSafe = esc($value);
                 $html .= '<tr>';
                 $html .= '<td class="metadata-label">' . $keySafe . '</td>';
                 $html .= '<td class="metadata-value">' . $valueSafe . '</td>';
