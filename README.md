@@ -176,7 +176,7 @@ See also the [Webex Interact Guide](WEBEX_INTERACT_GUIDE.md).
 
 ### Creating Your Own Parser
 
-A parser is one file in `parsers/` exposing `{name}Parse($rawBody, $headers, $metadata)` that returns `['html' => ..., 'subject' => ...]` or `false`. Build the body from `.section`, `table.metadata`, and `.data-box` blocks, escape free text with `esc()`, and wrap it with `emailShell()` from `parsers/helpers.php` so it picks up the shared design. See the [Parser Development Guide](../PARSER_PROMPT.md) for details.
+A parser is one file in `parsers/` exposing `{name}Parse($rawBody, $headers, $metadata)` that returns `['html' => ..., 'subject' => ...]` or `false`. Build the body from `.section`, `table.metadata`, and `.data-box` blocks, escape free text with `esc()`, and wrap it with `emailShell()` from `parsers/helpers.php` so it picks up the shared design. See the [Parser Development Guide](PARSER_PROMPT.md) for details.
 
 ---
 
@@ -370,7 +370,7 @@ The standard (no parser) email contains:
 - **Plus Addressing**: Use email plus addressing (e.g., `yourname+github%40gmail.com`) to track which services are sending webhooks
 - **Timestamp in Emails**: Check the timestamp in the header to verify webhook timing and debug delivery delays
 - **Standard Format**: Use the standard format (no parser) when you need complete raw data for debugging
-- **Create Parsers**: Build custom parsers for your favorite services - see [Parser Guide](../PARSER_PROMPT.md)
+- **Create Parsers**: Build custom parsers for your favorite services - see [Parser Guide](PARSER_PROMPT.md)
 
 ## 📝 Error Handling
 
