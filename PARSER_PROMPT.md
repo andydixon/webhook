@@ -1,10 +1,10 @@
 # Webhook Parser Development Guide
 
-This guide explains how to create custom webhook parsers for the Webhook Email Forwarder system.
+This guide explains how to create custom webhook parsers for the Webhook Email Forwarder.
 
 ## 📋 Overview
 
-Parsers allow you to format webhook data from specific services (like GitHub, Stripe, GitLab, etc.) into beautifully formatted HTML emails, rather than receiving raw webhook data.
+Parsers format webhook data from specific services (GitHub, Grafana, Stripe, GitLab, etc.) into readable HTML emails instead of the raw request dump.
 
 ## 🚀 Quick Start
 
@@ -23,14 +23,13 @@ https://your-domain.com/{email}/{parser-name}
 
 ### How It Works
 
-1. User configures webhook URL with their email and parser name
-2. Service sends webhook to your URL
-3. System looks for `parsers/{parser-name}.php` and a `{parser-name}Parse()` function inside it
-4. Parser function processes the webhook data
-5. Formatted email is sent to the user
-6. The caller gets a JSON acknowledgement that includes the parser name and the email subject
+1. User configures the webhook URL with their email and parser name
+2. Service sends a webhook to that URL
+3. The server looks the parser name up in the `parsers` map in `main.go`
+4. The parser turns the request into an email body and subject
+5. The email is sent and the caller gets a JSON acknowledgement naming the parser and subject
 
-If no parser is specified, the file doesn't exist, or the parser returns `false`, the system falls back to the default raw webhook format.
+If no parser is named, the name is unknown, or the parser returns `ok == false`, the default raw-request email is used instead.
 
 ---
 
@@ -38,210 +37,173 @@ If no parser is specified, the file doesn't exist, or the parser returns `false`
 
 ### File and Function
 
-Create `parsers/{servicename}.php`. The file is loaded on demand with `require_once`, and `parsers/helpers.php` is already loaded before it, so `emailShell()`, `esc()`, and `renderDataAsTable()` are available.
+Create `parser_{servicename}.go` in the package root with one function of this type:
 
-Every parser must follow this exact signature:
+```go
+// Parser turns a raw webhook into an email. ok=false means "fall back to the default email".
+type Parser func(raw []byte, headers http.Header, meta Meta) (html, subject string, ok bool)
+```
 
-```php
-<?php
-/**
- * {Service} Webhook Parser
- *
- * @param string $rawBody The raw request body
- * @param array $headers The request headers (associative array)
- * @param array $metadata Request metadata
- * @return array|false Array with 'html' and 'subject' keys, or false on failure
- */
-function {servicename}Parse($rawBody, $headers, $metadata) {
-    // Your parser logic here
+Then register it in `main.go`:
+
+```go
+var parsers = map[string]Parser{
+    "github":      githubParse,
+    "grafana":     grafanaParse,
+    "json":        jsonParse,
+    "wxinteract":  wxinteractParse,
+    "servicename": servicenameParse,   // <- add yours
 }
 ```
 
-### Parameters Explained
+### Parameters
 
-#### `$rawBody` (string)
-The complete raw body of the webhook request as received from the service.
+#### `raw []byte`
+The complete request body as received.
 
-```php
-// For JSON webhooks:
-$payload = json_decode($rawBody, true);
-
-// For XML webhooks:
-$xml = simplexml_load_string($rawBody);
-
-// For form data:
-parse_str($rawBody, $formData);
+```go
+v, err := decodeJSON(raw)          // ordered JSON: *OMap, []any, string, json.Number, bool, nil
+payload := asObject(v)             // nil if the body is not an object
 ```
 
-#### `$headers` (array)
-Associative array of all HTTP headers. Keys are header names, values are header values.
+`decodeJSON` keeps object keys in the order the sender wrote them, so tables read naturally. Use it rather than `encoding/json` into a `map`, which sorts keys.
 
-**Header names arrive in whatever case the client and proxy used.** Over HTTP/2 they are all lowercase. Normalise before looking anything up:
+#### `headers http.Header`
+All request headers, including `Host`. Lookups through `headers.Get` are case-insensitive, which covers the lowercase names HTTP/2 delivers:
 
-```php
-$headers = array_change_key_case($headers, CASE_LOWER);
-$eventType = $headers['x-event-type'] ?? 'unknown';
-$signature = $headers['x-hub-signature'] ?? null;
+```go
+event := headers.Get("X-GitHub-Event")
 ```
 
-#### `$metadata` (array)
-Additional request information:
-
-```php
-[
-    'date' => '2026-01-22 15:30:45',  // When webhook was received (Y-m-d H:i:s)
-    'ip' => '203.0.113.7',             // Client IP (the address nginx forwards, not the proxy)
-    'method' => 'POST',                 // HTTP method
-    'contentType' => 'application/json' // Content-Type header
-]
+#### `meta Meta`
+```go
+type Meta struct {
+    Date        string // "2026-01-22 15:30:45"
+    IP          string // the client address nginx forwards, not the proxy
+    Method      string // "POST"
+    ContentType string // "application/json"
+}
 ```
 
 ### Return Value
 
-**Success:** Return an array with two keys:
-
-```php
-return [
-    'html' => $htmlEmailBody,    // Complete HTML email (string)
-    'subject' => $emailSubject   // Email subject line (string)
-];
-```
-
-**Failure:** Return `false` to fall back to default formatting:
-
-```php
-if (!$payload || !isset($payload['required_field'])) {
-    return false;  // Will use default webhook email format
-}
-```
+- **Success:** the complete HTML document (from `emailShell`), the subject line, and `true`
+- **Failure:** `"", "", false` to fall back to the default email
 
 ---
 
 ## 🎨 Building the Email
 
-You do not write a full HTML document. Build the **body** out of the shared building blocks, then hand it to `emailShell()`, which adds the stylesheet, the gradient header, and the footer. Every parser looks the same this way and design changes happen in one place.
+Never write a full HTML document by hand. Compose the body from the helpers in `render.go` and wrap it with `emailShell`, which adds the stylesheet, gradient header, and footer. Every parser looks the same this way and design changes happen in one place.
 
-```php
-$html = emailShell($title, $timestamp, $body, $footerSentence);
+```go
+html := emailShell(title, stamp, body, footerSentence)
 ```
 
 | Argument | What it is |
 |----------|------------|
-| `$title` | Header text, already HTML-safe. Start with an emoji. |
-| `$timestamp` | Usually `$metadata['date']`, escaped. Shown as a pill under the title. |
-| `$body` | Your sections (see below). |
-| `$footerSentence` | Optional. One line, e.g. "This Stripe webhook was automatically forwarded to your email address." |
+| `title` | Header text, already HTML-safe. Start with an emoji. |
+| `stamp` | Usually `h(meta.Date)`. Shown as a pill under the title. |
+| `body` | Your sections. |
+| `footerSentence` | One line, e.g. "This Stripe webhook was automatically forwarded to your email address." Empty string for the generic default. |
 
 ### Building Blocks
 
-**Section** with a title:
-
-```html
-<div class="section">
-    <div class="section-title">💳 Payment Details</div>
-    ...
-</div>
+```go
+section(title, innerHTML string) string   // <div class="section"> with a title
+table(rows ...string) string              // a real <table class="metadata">
+row(label, valueHTML string) string       // one label/value <tr>
+link(url string) string                   // escaped <a href>
+kvTable(m *OMap) string                   // every key/value of an object as one table
+renderDataAsTable(v any, depth int) string // arbitrary nested JSON as tables (generic fallback)
 ```
 
-**Metadata table.** Always a real `<table>`; that is what keeps the value column full-width in every mail client:
+Example:
 
-```html
-<table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
-    <tr>
-        <td class="metadata-label">Amount</td>
-        <td class="metadata-value">$amountSafe</td>
-    </tr>
-</table>
+```go
+body := section("💳 Payment Details", table(
+    row("Event", h(event)),
+    row("Amount", h(amount)+" "+h(currency)),
+    row("Customer", h(customer)),
+)) + section("📝 Note", `<div class="message-box">`+esc(note)+`</div>`)
 ```
 
-**Other classes you can use:**
+**Other classes you can use inside a section:**
 
 | Class | Use for |
 |-------|---------|
-| `.subsection-title` | A bold sub-heading inside a section |
+| `.subsection-title` | A bold sub-heading |
 | `.data-box` | A `<pre>` for raw JSON, headers, or code (dark block) |
 | `.message-box` | Quoted free text such as an SMS body |
 | `.error-box` | Error details |
-| `.array-item` / `.array-item-title` | A card for one item of a list, e.g. one alert or one commit |
+| `.array-item` / `.array-item-title` | A card for one item of a list (an alert, a commit) |
 | `.path-title` | A breadcrumb pill above a nested table, e.g. `order->items->[0]` |
-| `.commit-item` with `.sha`, `.who`, `.msg` | The GitHub commit card layout, reusable for any "id + author + message" list |
+| `.commit-item` with `.sha`, `.who`, `.msg` | The GitHub commit card, reusable for any id + author + message list |
 
-**Dump an arbitrary array as tables** with the helper, which handles nesting for you:
+### Reading values
 
-```php
-$body .= renderDataAsTable($payload['details']);
+```go
+str(v)                       // scalar as text ("" for null, "true"/"false" for bools)
+strOr(v, "N/A")              // PHP's `?? 'N/A'`: only missing/null takes the default
+get(payload, "repository", "full_name")   // nested lookup, nil if any step is missing
+asObject(v)                  // *OMap or nil
+isContainer(v)               // object or array?
+num(v)                       // float64 for a json.Number, else 0
 ```
 
 ### Escaping
 
 Two helpers, use the right one:
 
-- `htmlspecialchars($s, ENT_QUOTES, 'UTF-8')` for anything that goes into an attribute, a subject line, or a single-line value.
-- `esc($s)` for free text that may contain line breaks (commit messages, descriptions, SMS bodies). It escapes **and** converts newlines to `<br>`.
+- `h(s)` for anything that goes into an attribute or a single-line value.
+- `esc(s)` for free text that may contain line breaks (commit messages, descriptions, SMS bodies). It escapes **and** converts newlines to `<br>`.
+
+Subjects are plain text, never escaped.
 
 ---
 
 ## 📝 Example: Simple Parser
 
-A minimal `parsers/simplepay.php` for a fictional "SimplePay" service:
+`parser_simplepay.go` for a fictional "SimplePay" service:
 
-```php
-<?php
-/**
- * SimplePay Webhook Parser
- */
-function simplepayParse($rawBody, $headers, $metadata) {
-    $payload = json_decode($rawBody, true);
-    if (!is_array($payload)) {
-        return false;  // Invalid JSON, use default format
-    }
+```go
+package main
 
-    // Extract data with fallbacks
-    $eventType = $payload['event'] ?? 'Unknown';
-    $amount = $payload['amount'] ?? 'N/A';
-    $currency = $payload['currency'] ?? 'USD';
-    $customer = $payload['customer_email'] ?? 'Unknown';
-    $note = $payload['note'] ?? '';
+import "net/http"
 
-    // Sanitise for HTML (IMPORTANT!)
-    $eventSafe = htmlspecialchars($eventType, ENT_QUOTES, 'UTF-8');
-    $amountSafe = htmlspecialchars($amount, ENT_QUOTES, 'UTF-8');
-    $currencySafe = htmlspecialchars($currency, ENT_QUOTES, 'UTF-8');
-    $customerSafe = htmlspecialchars($customer, ENT_QUOTES, 'UTF-8');
-    $noteSafe = esc($note);  // may be multi-line
-    $dateSafe = htmlspecialchars($metadata['date'], ENT_QUOTES, 'UTF-8');
-    $ipSafe = htmlspecialchars($metadata['ip'], ENT_QUOTES, 'UTF-8');
+func simplepayParse(raw []byte, headers http.Header, meta Meta) (string, string, bool) {
+	payload := asObject(mustDecode(raw))
+	if payload == nil {
+		return "", "", false // not a JSON object: use the default email
+	}
 
-    $body = <<<HTML
-        <div class="section">
-            <div class="section-title">💳 Payment Details</div>
-            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
-                <tr><td class="metadata-label">Event</td><td class="metadata-value">$eventSafe</td></tr>
-                <tr><td class="metadata-label">Amount</td><td class="metadata-value">$amountSafe $currencySafe</td></tr>
-                <tr><td class="metadata-label">Customer</td><td class="metadata-value">$customerSafe</td></tr>
-                <tr><td class="metadata-label">IP Address</td><td class="metadata-value">$ipSafe</td></tr>
-            </table>
-        </div>
-HTML;
+	event := strOr(payload.Get("event"), "Unknown")
+	amount := strOr(payload.Get("amount"), "N/A")
+	currency := strOr(payload.Get("currency"), "USD")
+	customer := strOr(payload.Get("customer_email"), "Unknown")
+	note := strOr(payload.Get("note"), "")
 
-    if ($noteSafe !== '') {
-        $body .= <<<HTML
-        <div class="section">
-            <div class="section-title">📝 Note</div>
-            <div class="message-box">$noteSafe</div>
-        </div>
-HTML;
-    }
+	body := section("💳 Payment Details", table(
+		row("Event", h(event)),
+		row("Amount", h(amount)+" "+h(currency)),
+		row("Customer", h(customer)),
+		row("IP Address", h(meta.IP)),
+	))
+	if note != "" {
+		body += section("📝 Note", `<div class="message-box">`+esc(note)+`</div>`)
+	}
 
-    $html = emailShell("💳 SimplePay: $eventSafe", $dateSafe, $body,
-        'This SimplePay webhook was automatically forwarded to your email address.');
+	html := emailShell("💳 SimplePay: "+h(event), h(meta.Date), body,
+		"This SimplePay webhook was automatically forwarded to your email address.")
+	return html, "💳 SimplePay " + event + " - " + amount + " " + currency, true
+}
 
-    $subject = "💳 SimplePay $eventType - $amount $currency";
-
-    return [
-        'html' => $html,
-        'subject' => $subject
-    ];
+func mustDecode(raw []byte) any {
+	v, err := decodeJSON(raw)
+	if err != nil {
+		return nil
+	}
+	return v
 }
 ```
 
@@ -251,16 +213,15 @@ HTML;
 
 The shell owns colours, fonts, and spacing. Parsers only choose structure and words.
 
-1. **Sections**: one `.section` per logical group, each with a `.section-title`
-2. **Tables**: `table.metadata` for label/value pairs, never bare divs
+1. **Sections**: one `section` per logical group
+2. **Tables**: `table(row(...))` for label/value pairs, never hand-written divs
 3. **Lists**: one `.array-item` card per item (alerts, commits, line items)
 4. **Raw data**: `.data-box` for anything the reader might want to copy
-5. **Free text**: `.message-box`, escaped with `esc()`
-6. **Links**: plain `<a href>`; the shell styles them
+5. **Free text**: `.message-box`, escaped with `esc`
+6. **Links**: `link(url)`
 
 ### Emojis
 
-Use relevant emojis to make emails scannable:
 - 💳 Payment events
 - 🚀 Deployments/releases
 - 📤 Push/upload events
@@ -275,278 +236,145 @@ Put the same emoji at the start of the subject line so inbox filters can key on 
 
 ## 🔒 Security Best Practices
 
-### 1. Always Sanitise HTML Output
+### 1. Escape everything dynamic
 
-**CRITICAL:** Escape ALL dynamic content:
-
-```php
-// ❌ DANGEROUS - XSS vulnerability
-$html = "<div>{$payload['user_input']}</div>";
+```go
+// ❌ DANGEROUS - XSS in the email
+body += "<div>" + str(payload.Get("user_input")) + "</div>"
 
 // ✅ SAFE (single line)
-$safe = htmlspecialchars($payload['user_input'], ENT_QUOTES, 'UTF-8');
+body += "<div>" + h(str(payload.Get("user_input"))) + "</div>"
 
 // ✅ SAFE (multi-line free text)
-$safe = esc($payload['user_message']);
+body += `<div class="message-box">` + esc(str(payload.Get("message"))) + `</div>`
 ```
 
-### 2. Validate Input
+### 2. Validate input
 
-Check that required data exists before using it:
-
-```php
-if (!is_array($payload) || !isset($payload['event_type'])) {
-    return false;  // Fail safely
+```go
+if payload == nil || payload.Get("event_type") == nil {
+    return "", "", false
 }
 ```
 
-### 3. Handle Errors Gracefully
+### 3. Verify signatures (optional)
 
-Return `false` if parsing fails. The system falls back to the default format and the sender still gets a `200`.
-
-### 4. Verify Signatures (Optional)
-
-If the service provides webhook signatures, validate them:
-
-```php
-$headers = array_change_key_case($headers, CASE_LOWER);
-$signature = $headers['x-service-signature'] ?? null;
-if ($signature) {
-    $expectedSignature = hash_hmac('sha256', $rawBody, $secret);
-    if (!hash_equals($expectedSignature, $signature)) {
-        return false;  // Invalid signature
-    }
+```go
+sig := headers.Get("X-Service-Signature")
+mac := hmac.New(sha256.New, []byte(secret))
+mac.Write(raw)
+if sig == "" || !hmac.Equal([]byte(sig), []byte(hex.EncodeToString(mac.Sum(nil)))) {
+    return "", "", false
 }
-```
-
----
-
-## 📦 Parser Examples by Service Type
-
-### JSON API Webhooks (Most Common)
-
-```php
-$payload = json_decode($rawBody, true);
-if (!is_array($payload)) return false;
-```
-
-### XML Webhooks
-
-```php
-$xml = simplexml_load_string($rawBody);
-if (!$xml) return false;
-$event = (string)$xml->event;
-```
-
-### Form Data Webhooks
-
-```php
-parse_str($rawBody, $formData);
-if (empty($formData)) return false;
-$event = $formData['event'] ?? 'Unknown';
 ```
 
 ---
 
 ## 🧪 Testing Your Parser
 
-### 1. Lint it
+### 1. Unit test
+
+`main_test.go` has a `capture(t)` helper that swaps the mailer for an in-memory one and a `do(...)` helper that drives the handler. Add a test in the same style:
+
+```go
+func TestSimplePay(t *testing.T) {
+	c := capture(t)
+	_, out := do(t, "POST", "/t%40e.com/simplepay", `{"event":"paid","amount":"9.99"}`, nil)
+	if out["subject"] != "💳 SimplePay paid - 9.99 USD" || !strings.Contains(c.html, "9.99") {
+		t.Fatalf("%v", out["subject"])
+	}
+}
+```
 
 ```bash
-php -l parsers/yourservice.php
+go test ./...
 ```
 
 ### 2. Run locally without sending mail
 
-PHP's built-in server plus a `sendmail_path` override captures every email as a file instead of sending it:
+Point the server at any SMTP sink (the repo's tests don't need one, but for eyeballing the HTML):
 
 ```bash
-mkdir -p /tmp/mail
-php -S 127.0.0.1:8099 -d sendmail_path="sh -c 'cat > /tmp/mail/\$\$.eml'" index.php
-```
-
-Then post to it:
-
-```bash
-curl -X POST http://127.0.0.1:8099/test%40example.com/yourservice \
+LISTEN=127.0.0.1:8098 SMTP_ADDR=127.0.0.1:2525 go run .
+curl -X POST http://127.0.0.1:8098/test%40example.com/simplepay \
   -H "Content-Type: application/json" \
-  -H "X-Service-Event: payment.completed" \
-  -d '{"amount": 99.99, "currency": "USD"}'
+  -d '{"event":"paid","amount":"9.99","currency":"USD"}'
 ```
 
-The JSON response tells you which parser ran and what subject was used. Open the `.eml` file in `/tmp/mail` (strip the headers above the first blank line) in a browser to check the layout.
+The JSON response tells you which parser ran and what subject was used.
 
-### 3. Test the Failure Case
+### 3. Test the failure case
 
-Send invalid data to ensure your parser returns `false` correctly:
-
-```bash
-curl -X POST http://127.0.0.1:8099/test%40example.com/yourservice \
-  -H "Content-Type: application/json" \
-  -d 'invalid json{'
-```
-
-You should get the default webhook format email.
+Send invalid data and confirm the response shows the default subject (`‼️ Webhook Request Received`).
 
 ### 4. Test a lowercase header
 
-Real deliveries over HTTP/2 arrive with lowercase header names. Send one that way and make sure your parser still identifies the event:
-
-```bash
-curl -X POST http://127.0.0.1:8099/test%40example.com/yourservice \
-  -H "x-service-event: payment.completed" -d '{}'
-```
-
-### 5. Check the Email
-
-- ✅ Subject line is descriptive and includes an emoji
-- ✅ Value cells fill the table width
-- ✅ Multi-line text keeps its line breaks
-- ✅ No raw HTML from the payload is rendered
-- ✅ Links (if any) are clickable
+Real deliveries over HTTP/2 arrive with lowercase header names. `headers.Get` handles it, but if you read `headers[...]` directly you will miss them.
 
 ---
 
 ## 📋 Parser Checklist
 
-Before submitting a parser, verify:
-
-- [ ] File is `parsers/{servicename}.php` and the function is `{servicename}Parse` (lowercase)
-- [ ] Function signature matches exactly: `($rawBody, $headers, $metadata)`
-- [ ] Returns `array` with 'html' and 'subject' keys on success
+- [ ] File is `parser_{servicename}.go` and the function matches the `Parser` type
+- [ ] Registered in the `parsers` map in `main.go`
 - [ ] Returns `false` on failure/invalid data
-- [ ] Header lookups are case-insensitive
-- [ ] All dynamic content is escaped (`htmlspecialchars()` or `esc()`)
-- [ ] Body uses the shared classes and is wrapped with `emailShell()`
-- [ ] Metadata is rendered with `table.metadata`, not divs
+- [ ] Header lookups use `headers.Get`
+- [ ] All dynamic content goes through `h` or `esc`
+- [ ] Body uses `section` / `table` / `row` and is wrapped with `emailShell`
 - [ ] Subject line includes an emoji and key information
-- [ ] Tested with valid, invalid, and lowercase-header requests
-- [ ] Documented any special requirements (API keys, signature validation, etc.)
+- [ ] Unit test added and `go test ./...` passes
+- [ ] README section added for the parser
 
 ---
 
 ## 🤝 Contributing Parsers
 
-To contribute a parser:
-
-1. **Add `parsers/{servicename}.php`**
-2. **Test Thoroughly** with real webhook data
-3. **Document Usage** - Add a section to README.md with:
-   - Service name
-   - URL format
-   - Supported events
-   - Example webhook configuration
-4. **Submit Pull Request** with:
-   - Parser file
-   - Documentation updates
-   - Example webhook payload (in PR description)
-
----
-
-## 💡 Tips & Tricks
-
-### Handle Multiple Event Types
-
-Use a `switch` statement for different event types:
-
-```php
-switch ($eventType) {
-    case 'payment.completed':
-        $icon = '💳';
-        break;
-    case 'refund.created':
-        $icon = '↩️';
-        break;
-    default:
-        $icon = '🔔';
-}
-```
-
-### Pretty Print JSON
-
-For a debugging section:
-
-```php
-$jsonSafe = htmlspecialchars(
-    json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-    ENT_QUOTES,
-    'UTF-8'
-);
-$body .= '<div class="section"><div class="section-title">📦 Raw Payload</div><pre class="data-box">' . $jsonSafe . '</pre></div>';
-```
-
-### Truncate Long Content
-
-```php
-$message = mb_substr($payload['message'], 0, 500);
-if (mb_strlen($payload['message']) > 500) {
-    $message .= '…';
-}
-```
-
-### Include Links
-
-```php
-$url = htmlspecialchars($payload['url'], ENT_QUOTES, 'UTF-8');
-$body .= "<a href=\"$url\">$url</a>";
-```
+1. Add `parser_{servicename}.go` and register it
+2. Add a test
+3. Document usage in README.md (service name, URL format, supported events)
+4. Submit a pull request with an example payload in the description
 
 ---
 
 ## 📚 Reference
 
-### Existing Parsers
+### Existing parsers
 
-Study these in `parsers/`:
-- `github.php` - Multiple event types, commit cards, case-insensitive headers
-- `grafana.php` - Nested alert cards with label and annotation tables
-- `json.php` - Recursive rendering with path breadcrumbs
-- `wxinteract.php` - Many event types split into helper functions
-- `helpers.php` - `emailShell()`, `esc()`, `renderDataAsTable()`
+- `parser_github.go` - Multiple event types, commit cards, generic fallback
+- `parser_grafana.go` - Nested alert cards with label and annotation tables
+- `parser_json.go` - Recursive rendering with path breadcrumbs
+- `parser_wxinteract.go` - Many event types in one switch
+- `render.go` - `emailShell`, `esc`, `h`, `decodeJSON`, `renderDataAsTable`, table helpers
+- `main.go` - Routing, JSON response, default email, parser registry
+- `mail.go` - SMTP delivery
 
-### Useful PHP Functions
+### Configuration
 
-- `json_decode($string, true)` - Parse JSON to array
-- `simplexml_load_string($string)` - Parse XML
-- `parse_str($string, $output)` - Parse URL-encoded data
-- `array_change_key_case($headers, CASE_LOWER)` - Normalise header names
-- `htmlspecialchars($string, ENT_QUOTES, 'UTF-8')` - Escape HTML
-- `esc($string)` - Escape HTML and keep line breaks
-- `hash_hmac()` / `hash_equals()` - Verify signatures
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `LISTEN` | `127.0.0.1:8080` | Address to listen on (`:8080` in the container) |
+| `SMTP_ADDR` | `127.0.0.1:25` | SMTP relay (`172.17.0.1:25` in the container, the host's postfix) |
+| `MAIL_FROM` | `no-reply@dixon.cx` | Envelope and From address |
+| `PUBLIC_HOST` | `webhooks.dixon.cx` | Host shown in email footers |
 
 ---
 
 ## ❓ FAQ
 
 **Q: Can I use external libraries?**
-A: No, parsers should use only PHP built-in functions to avoid dependencies.
+A: The project has no dependencies beyond the standard library. Keep it that way unless there is a very good reason.
 
 **Q: Can I make API calls in a parser?**
-A: Not recommended - parsers should be fast and not depend on external services.
+A: Not recommended. Parsers should be fast and not depend on external services.
 
 **Q: What if my service sends different content types?**
-A: Check `$metadata['contentType']` and handle accordingly.
-
-**Q: Can I store data in a database?**
-A: No, parsers should only format and return email content.
-
-**Q: How do I handle webhook signatures?**
-A: Validate in your parser and return `false` if invalid.
+A: Check `meta.ContentType` and parse accordingly.
 
 **Q: Can I create multiple parsers for one service?**
-A: Yes! Use names like `githubissues`, `githubpush`, etc. Each is its own file.
+A: Yes. Register as many names as you like.
 
 **Q: Can I change the colours or fonts?**
-A: Change them in `emailShell()` in `parsers/helpers.php` and every email picks them up.
-
----
-
-## 📞 Support
-
-For questions or help developing parsers:
-- GitHub Issues: https://github.com/andydixon/webhook/issues
-- Review existing parsers in `parsers/`
-- Check this guide for examples
+A: Change `shellSrc` in `render.go` and every email picks it up.
 
 ---
 

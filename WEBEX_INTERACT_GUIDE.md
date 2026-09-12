@@ -336,7 +336,7 @@ If you're receiving raw webhook data instead of formatted emails:
 
 1. **Check URL:** Ensure `/wxinteract` is at the end of the URL
 2. **Check payload structure:** Parser expects `{"data": {"status": "...", ...}}`
-3. **Check PHP logs:** Look for any parser errors in your server logs
+3. **Check the container logs:** `docker logs webhooks.dixon.cx` shows mail failures and parser errors
 
 ### Missing Fields
 
