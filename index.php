@@ -62,6 +62,14 @@ $dateReceived = date('Y-m-d H:i:s');
 // Retrieve the IP address of the client making the request
 // Note: This may be a proxy IP if behind a load balancer or CDN
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+// Behind nginx the peer is the Docker bridge; use the address nginx forwards.
+// Only trust the proxy headers when the peer itself is a private/loopback address.
+if (!filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+    $forwarded = $_SERVER['HTTP_X_REAL_IP'] ?? trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')[0]);
+    if (filter_var($forwarded, FILTER_VALIDATE_IP)) {
+        $ipAddress = $forwarded;
+    }
+}
 
 // Capture the HTTP method used for this request (GET, POST, PUT, DELETE, etc.)
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'Unknown';
