@@ -119,7 +119,7 @@ function buildOutboundSmsSubmittedContent($data) {
     $messageId = htmlspecialchars($data['message_id'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $to = htmlspecialchars($data['to'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $from = htmlspecialchars($data['from'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
-    $message = htmlspecialchars($data['message'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
+    $message = esc($data['message'] ?? 'N/A');
     $submittedAt = htmlspecialchars($data['submitted_at'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $campaignId = htmlspecialchars($data['campaign_id'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     
@@ -205,7 +205,7 @@ function buildOutboundSmsFailedContent($data) {
     $from = htmlspecialchars($data['from'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $failedAt = htmlspecialchars($data['failed_at'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $errorCode = htmlspecialchars($data['error_code'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
-    $errorMessage = htmlspecialchars($data['error_message'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
+    $errorMessage = esc($data['error_message'] ?? 'N/A');
     $campaignId = htmlspecialchars($data['campaign_id'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     
     return <<<HTML
@@ -307,7 +307,7 @@ function buildInboundSmsContent($data) {
     $messageId = htmlspecialchars($data['message_id'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $from = htmlspecialchars($data['from'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $to = htmlspecialchars($data['to'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
-    $message = htmlspecialchars($data['message'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
+    $message = esc($data['message'] ?? 'N/A');
     $receivedAt = htmlspecialchars($data['received_at'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     $keyword = htmlspecialchars($data['keyword'] ?? 'N/A', ENT_QUOTES, 'UTF-8');
     
@@ -402,7 +402,7 @@ function buildContactsCallbackContent($data) {
         $customFieldsHtml = '<div class="section"><div class="section-title">🏷️  Custom Fields</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
         foreach ($data['custom_fields'] as $key => $value) {
             $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
-            $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+            $valueSafe = esc($value);
             $customFieldsHtml .= <<<HTML
             <tr>
                 <td class="metadata-label">$keySafe</td>

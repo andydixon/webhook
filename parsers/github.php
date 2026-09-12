@@ -66,10 +66,12 @@ HTML;
             if ($commitCount > 0) {
                 $eventContent .= '<div class="section"><div class="section-title">Commits</div>';
                 foreach (array_slice($commits, 0, 10) as $commit) {
-                    $message = htmlspecialchars($commit['message'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $message = esc($commit['message'] ?? '');
                     $author = htmlspecialchars($commit['author']['name'] ?? 'Unknown', ENT_QUOTES, 'UTF-8');
                     $sha = htmlspecialchars(substr($commit['id'] ?? '', 0, 7), ENT_QUOTES, 'UTF-8');
-                    $eventContent .= "<div class=\"commit-item\"><strong>$sha</strong> $message <em>by $author</em></div>";
+                    $url = htmlspecialchars($commit['url'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $shaHtml = $url ? "<a class=\"sha\" href=\"$url\">$sha</a>" : "<span class=\"sha\">$sha</span>";
+                    $eventContent .= "<div class=\"commit-item\">$shaHtml <span class=\"who\">$author</span><div class=\"msg\">$message</div></div>";
                 }
                 $eventContent .= '</div>';
             }
