@@ -46,20 +46,20 @@ function githubParse($rawBody, $headers, $metadata) {
             $eventContent = <<<HTML
             <div class="section">
                 <div class="section-title">Push Details</div>
-                <div class="metadata">
-                    <div class="metadata-row">
-                        <div class="metadata-label">Branch</div>
-                        <div class="metadata-value">$ref</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Commits</div>
-                        <div class="metadata-value">$commitCount</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Pusher</div>
-                        <div class="metadata-value">$senderSafe</div>
-                    </div>
-                </div>
+                <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                    <tr>
+                        <td class="metadata-label">Branch</td>
+                        <td class="metadata-value">$ref</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Commits</td>
+                        <td class="metadata-value">$commitCount</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Pusher</td>
+                        <td class="metadata-value">$senderSafe</td>
+                    </tr>
+                </table>
             </div>
 HTML;
             
@@ -88,28 +88,28 @@ HTML;
             $eventContent = <<<HTML
             <div class="section">
                 <div class="section-title">Pull Request Details</div>
-                <div class="metadata">
-                    <div class="metadata-row">
-                        <div class="metadata-label">Number</div>
-                        <div class="metadata-value">#$prNumber</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Title</div>
-                        <div class="metadata-value">$prTitle</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">State</div>
-                        <div class="metadata-value">$prState</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Branch</div>
-                        <div class="metadata-value">$prHead → $prBase</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">URL</div>
-                        <div class="metadata-value"><a href="$prUrl" style="color: #7c3aed;">$prUrl</a></div>
-                    </div>
-                </div>
+                <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                    <tr>
+                        <td class="metadata-label">Number</td>
+                        <td class="metadata-value">#$prNumber</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Title</td>
+                        <td class="metadata-value">$prTitle</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">State</td>
+                        <td class="metadata-value">$prState</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Branch</td>
+                        <td class="metadata-value">$prHead → $prBase</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">URL</td>
+                        <td class="metadata-value"><a href="$prUrl" style="color: #7c3aed;">$prUrl</a></td>
+                    </tr>
+                </table>
             </div>
 HTML;
             break;
@@ -125,24 +125,24 @@ HTML;
             $eventContent = <<<HTML
             <div class="section">
                 <div class="section-title">Issue Details</div>
-                <div class="metadata">
-                    <div class="metadata-row">
-                        <div class="metadata-label">Number</div>
-                        <div class="metadata-value">#$issueNumber</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Title</div>
-                        <div class="metadata-value">$issueTitle</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">State</div>
-                        <div class="metadata-value">$issueState</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">URL</div>
-                        <div class="metadata-value"><a href="$issueUrl" style="color: #7c3aed;">$issueUrl</a></div>
-                    </div>
-                </div>
+                <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                    <tr>
+                        <td class="metadata-label">Number</td>
+                        <td class="metadata-value">#$issueNumber</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Title</td>
+                        <td class="metadata-value">$issueTitle</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">State</td>
+                        <td class="metadata-value">$issueState</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">URL</td>
+                        <td class="metadata-value"><a href="$issueUrl" style="color: #7c3aed;">$issueUrl</a></td>
+                    </tr>
+                </table>
             </div>
 HTML;
             break;
@@ -157,20 +157,20 @@ HTML;
             $eventContent = <<<HTML
             <div class="section">
                 <div class="section-title">Release Details</div>
-                <div class="metadata">
-                    <div class="metadata-row">
-                        <div class="metadata-label">Tag</div>
-                        <div class="metadata-value">$tagName</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">Name</div>
-                        <div class="metadata-value">$releaseName</div>
-                    </div>
-                    <div class="metadata-row">
-                        <div class="metadata-label">URL</div>
-                        <div class="metadata-value"><a href="$releaseUrl" style="color: #7c3aed;">$releaseUrl</a></div>
-                    </div>
-                </div>
+                <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                    <tr>
+                        <td class="metadata-label">Tag</td>
+                        <td class="metadata-value">$tagName</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">Name</td>
+                        <td class="metadata-value">$releaseName</td>
+                    </tr>
+                    <tr>
+                        <td class="metadata-label">URL</td>
+                        <td class="metadata-value"><a href="$releaseUrl" style="color: #7c3aed;">$releaseUrl</a></td>
+                    </tr>
+                </table>
             </div>
 HTML;
             break;
@@ -190,24 +190,24 @@ HTML;
 
         <div class="section">
             <div class="section-title">📋 Repository Information</div>
-            <div class="metadata">
-                <div class="metadata-row">
-                    <div class="metadata-label">Repository</div>
-                    <div class="metadata-value">$repoSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Event</div>
-                    <div class="metadata-value">$eventSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">Sender</div>
-                    <div class="metadata-value">$senderSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">IP Address</div>
-                    <div class="metadata-value">$ipSafe</div>
-                </div>
-            </div>
+            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td class="metadata-label">Repository</td>
+                    <td class="metadata-value">$repoSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Event</td>
+                    <td class="metadata-value">$eventSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">Sender</td>
+                    <td class="metadata-value">$senderSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">IP Address</td>
+                    <td class="metadata-value">$ipSafe</td>
+                </tr>
+            </table>
         </div>
 
         $eventContent

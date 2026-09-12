@@ -47,42 +47,42 @@ function grafanaParse($rawBody, $headers, $metadata) {
     $alertSummary = <<<HTML
     <div class="section">
         <div class="section-title">Alert Summary</div>
-        <div class="metadata">
-            <div class="metadata-row">
-                <div class="metadata-label">Status</div>
-                <div class="metadata-value"><strong style="color: $statusColor;">$statusIcon $statusSafe</strong></div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Receiver</div>
-                <div class="metadata-value">$receiverSafe</div>
-            </div>
-            <div class="metadata-row">
-                <div class="metadata-label">Alert Count</div>
-                <div class="metadata-value">$alertCount</div>
-            </div>
+        <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td class="metadata-label">Status</td>
+                <td class="metadata-value"><strong style="color: $statusColor;">$statusIcon $statusSafe</strong></td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Receiver</td>
+                <td class="metadata-value">$receiverSafe</td>
+            </tr>
+            <tr>
+                <td class="metadata-label">Alert Count</td>
+                <td class="metadata-value">$alertCount</td>
+            </tr>
 HTML;
     
     if ($truncatedAlerts > 0) {
         $alertSummary .= <<<HTML
-            <div class="metadata-row">
-                <div class="metadata-label">Truncated Alerts</div>
-                <div class="metadata-value">$truncatedAlerts</div>
-            </div>
+            <tr>
+                <td class="metadata-label">Truncated Alerts</td>
+                <td class="metadata-value">$truncatedAlerts</td>
+            </tr>
 HTML;
     }
     
     if ($externalURL) {
         $externalURLSafe = htmlspecialchars($externalURL, ENT_QUOTES, 'UTF-8');
         $alertSummary .= <<<HTML
-            <div class="metadata-row">
-                <div class="metadata-label">Alertmanager URL</div>
-                <div class="metadata-value"><a href="$externalURLSafe" style="color: #7c3aed;">$externalURLSafe</a></div>
-            </div>
+            <tr>
+                <td class="metadata-label">Alertmanager URL</td>
+                <td class="metadata-value"><a href="$externalURLSafe" style="color: #7c3aed;">$externalURLSafe</a></td>
+            </tr>
 HTML;
     }
     
     $alertSummary .= <<<HTML
-        </div>
+        </table>
     </div>
 HTML;
     
@@ -92,33 +92,33 @@ HTML;
         $labelsContent .= '<div class="section"><div class="section-title">Labels</div>';
         
         if (!empty($groupLabels)) {
-            $labelsContent .= '<div class="subsection-title">Group Labels</div><div class="metadata">';
+            $labelsContent .= '<div class="subsection-title">Group Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             foreach ($groupLabels as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                 $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                 $labelsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">$keySafe</div>
-                    <div class="metadata-value">$valueSafe</div>
-                </div>
+                <tr>
+                    <td class="metadata-label">$keySafe</td>
+                    <td class="metadata-value">$valueSafe</td>
+                </tr>
 HTML;
             }
-            $labelsContent .= '</div>';
+            $labelsContent .= '</table>';
         }
         
         if (!empty($commonLabels)) {
-            $labelsContent .= '<div class="subsection-title">Common Labels</div><div class="metadata">';
+            $labelsContent .= '<div class="subsection-title">Common Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             foreach ($commonLabels as $key => $value) {
                 $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                 $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                 $labelsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">$keySafe</div>
-                    <div class="metadata-value">$valueSafe</div>
-                </div>
+                <tr>
+                    <td class="metadata-label">$keySafe</td>
+                    <td class="metadata-value">$valueSafe</td>
+                </tr>
 HTML;
             }
-            $labelsContent .= '</div>';
+            $labelsContent .= '</table>';
         }
         
         $labelsContent .= '</div>';
@@ -127,18 +127,18 @@ HTML;
     // Build common annotations section
     $annotationsContent = '';
     if (!empty($commonAnnotations)) {
-        $annotationsContent .= '<div class="section"><div class="section-title">Common Annotations</div><div class="metadata">';
+        $annotationsContent .= '<div class="section"><div class="section-title">Common Annotations</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
         foreach ($commonAnnotations as $key => $value) {
             $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
             $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             $annotationsContent .= <<<HTML
-            <div class="metadata-row">
-                <div class="metadata-label">$keySafe</div>
-                <div class="metadata-value">$valueSafe</div>
-            </div>
+            <tr>
+                <td class="metadata-label">$keySafe</td>
+                <td class="metadata-value">$valueSafe</td>
+            </tr>
 HTML;
         }
-        $annotationsContent .= '</div></div>';
+        $annotationsContent .= '</table></div>';
     }
     
     // Build individual alerts section
@@ -172,83 +172,83 @@ HTML;
             $alertsContent .= <<<HTML
             <div class="array-item">
                 <div class="array-item-title">$alertIcon Alert $alertNumber - <span style="color: $alertColor;">$alertStatusSafe</span></div>
-                <div class="metadata">
+                <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
 HTML;
             
             // Add alert labels
             if (!empty($alertLabels)) {
-                $alertsContent .= '</div><div class="subsection-title">Labels</div><div class="metadata">';
+                $alertsContent .= '</table><div class="subsection-title">Labels</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                 foreach ($alertLabels as $key => $value) {
                     $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                     $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                     $alertsContent .= <<<HTML
-                    <div class="metadata-row">
-                        <div class="metadata-label">$keySafe</div>
-                        <div class="metadata-value">$valueSafe</div>
-                    </div>
+                    <tr>
+                        <td class="metadata-label">$keySafe</td>
+                        <td class="metadata-value">$valueSafe</td>
+                    </tr>
 HTML;
                 }
-                $alertsContent .= '</div><div class="metadata">';
+                $alertsContent .= '</table><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             }
             
             // Add alert annotations
             if (!empty($alertAnnotations)) {
-                $alertsContent .= '</div><div class="subsection-title">Annotations</div><div class="metadata">';
+                $alertsContent .= '</table><div class="subsection-title">Annotations</div><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
                 foreach ($alertAnnotations as $key => $value) {
                     $keySafe = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
                     $valueSafe = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                     $alertsContent .= <<<HTML
-                    <div class="metadata-row">
-                        <div class="metadata-label">$keySafe</div>
-                        <div class="metadata-value">$valueSafe</div>
-                    </div>
+                    <tr>
+                        <td class="metadata-label">$keySafe</td>
+                        <td class="metadata-value">$valueSafe</td>
+                    </tr>
 HTML;
                 }
-                $alertsContent .= '</div><div class="metadata">';
+                $alertsContent .= '</table><table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">';
             }
             
             // Add timing and metadata
             if ($startsAt) {
                 $startsAtSafe = htmlspecialchars($startsAt, ENT_QUOTES, 'UTF-8');
                 $alertsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">Started At</div>
-                    <div class="metadata-value">$startsAtSafe</div>
-                </div>
+                <tr>
+                    <td class="metadata-label">Started At</td>
+                    <td class="metadata-value">$startsAtSafe</td>
+                </tr>
 HTML;
             }
             
             if ($endsAt) {
                 $endsAtSafe = htmlspecialchars($endsAt, ENT_QUOTES, 'UTF-8');
                 $alertsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">Ended At</div>
-                    <div class="metadata-value">$endsAtSafe</div>
-                </div>
+                <tr>
+                    <td class="metadata-label">Ended At</td>
+                    <td class="metadata-value">$endsAtSafe</td>
+                </tr>
 HTML;
             }
             
             if ($generatorURL) {
                 $generatorURLSafe = htmlspecialchars($generatorURL, ENT_QUOTES, 'UTF-8');
                 $alertsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">Generator URL</div>
-                    <div class="metadata-value"><a href="$generatorURLSafe" style="color: #7c3aed;">$generatorURLSafe</a></div>
-                </div>
+                <tr>
+                    <td class="metadata-label">Generator URL</td>
+                    <td class="metadata-value"><a href="$generatorURLSafe" style="color: #7c3aed;">$generatorURLSafe</a></td>
+                </tr>
 HTML;
             }
             
             if ($fingerprint) {
                 $fingerprintSafe = htmlspecialchars($fingerprint, ENT_QUOTES, 'UTF-8');
                 $alertsContent .= <<<HTML
-                <div class="metadata-row">
-                    <div class="metadata-label">Fingerprint</div>
-                    <div class="metadata-value">$fingerprintSafe</div>
-                </div>
+                <tr>
+                    <td class="metadata-label">Fingerprint</td>
+                    <td class="metadata-value">$fingerprintSafe</td>
+                </tr>
 HTML;
             }
             
-            $alertsContent .= '</div></div>';
+            $alertsContent .= '</table></div>';
         }
         
         $alertsContent .= '</div>';
@@ -268,16 +268,16 @@ HTML;
 
         <div class="section">
             <div class="section-title">📋 Request Information</div>
-            <div class="metadata">
-                <div class="metadata-row">
-                    <div class="metadata-label">Receiver</div>
-                    <div class="metadata-value">$receiverSafe</div>
-                </div>
-                <div class="metadata-row">
-                    <div class="metadata-label">IP Address</div>
-                    <div class="metadata-value">$ipSafe</div>
-                </div>
-            </div>
+            <table class="metadata" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                    <td class="metadata-label">Receiver</td>
+                    <td class="metadata-value">$receiverSafe</td>
+                </tr>
+                <tr>
+                    <td class="metadata-label">IP Address</td>
+                    <td class="metadata-value">$ipSafe</td>
+                </tr>
+            </table>
         </div>
 HTML;
     $html = emailShell($emailTitle, $emailStamp, $body, "This Grafana/Prometheus alert was automatically forwarded to your email address.");
