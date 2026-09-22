@@ -354,7 +354,7 @@ Real deliveries over HTTP/2 arrive with lowercase header names. `headers.Get` ha
 |----------|---------|---------|
 | `LISTEN` | `127.0.0.1:8080` | Address to listen on (`:8080` in the container) |
 | `SMTP_ADDR` | `127.0.0.1:25` | SMTP relay (`172.17.0.1:25` in the container, the host's postfix) |
-| `MAIL_FROM` | `no-reply@dixon.cx` | Envelope and From address |
+| `MAIL_FROM` | `no-reply@webhook.me.uk` | Envelope and From address |
 | `PUBLIC_HOST` | `webhook.me.uk` | Host shown in email footers |
 
 ---

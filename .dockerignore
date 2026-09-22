@@ -2,3 +2,4 @@
 !go.mod
 !*.go
 !docs.html
+!static

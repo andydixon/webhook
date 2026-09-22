@@ -6,12 +6,13 @@ import (
 	"mime/quotedprintable"
 	"net/smtp"
 	"os"
+	"strings"
 	"time"
 )
 
 var (
 	smtpAddr = envOr("SMTP_ADDR", "127.0.0.1:25")
-	mailFrom = envOr("MAIL_FROM", "no-reply@dixon.cx")
+	mailFrom = envOr("MAIL_FROM", "no-reply@webhook.me.uk")
 )
 
 // sendMail is a variable so tests can capture messages instead of sending them.
@@ -43,7 +44,7 @@ func smtpSend(to, subject, htmlBody string) error {
 }
 
 func buildMessage(to, subject, htmlBody string) []byte {
-	host, _ := os.Hostname()
+	host := mailFrom[strings.LastIndex(mailFrom, "@")+1:]
 	var b []byte
 	b = fmt.Appendf(b, "From: Webhook Call <%s>\r\n", mailFrom)
 	b = fmt.Appendf(b, "To: <%s>\r\n", to)

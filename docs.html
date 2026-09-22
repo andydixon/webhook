@@ -1,10 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook → Email | {{.Host}}</title>
+<title>Webhook → Email: forward any webhook to your inbox | {{.Canonical}}</title>
 <meta name="description" content="Point any webhook at a URL with your email in it. Get the whole request in your inbox. That's it. That's the product.">
+<link rel="canonical" href="https://{{.Canonical}}/">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Andy Dixon">
+<meta name="theme-color" content="#0047ab">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="webhook→email">
+<meta property="og:title" content="Webhooks. Straight to your inbox.">
+<meta property="og:description" content="Point any webhook at a URL with your email in it. Get the whole request in your inbox. No signup, no dashboard.">
+<meta property="og:url" content="https://{{.Canonical}}/">
+<meta property="og:image" content="https://{{.Canonical}}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Webhooks. Straight to your inbox. https://{{.Canonical}}/you%40example.com">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Webhooks. Straight to your inbox.">
+<meta name="twitter:description" content="Point any webhook at a URL with your email in it. Get the whole request in your inbox. No signup, no dashboard.">
+<meta name="twitter:image" content="https://{{.Canonical}}/og.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"webhook→email","url":"https://{{.Canonical}}/","description":"Forward any webhook to your inbox as a formatted email. Parsers for GitHub, Grafana, JSON and Webex Interact.","applicationCategory":"DeveloperApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"GBP"},"author":{"@type":"Person","name":"Andy Dixon","url":"https://dixon.cx/"}}
+</script>
 <style>
 :root{
   --bg:#ffffff;--panel:#f6f8fc;--line:#e3e7ef;
@@ -250,7 +274,7 @@ requests.post(
 
 <footer>
   <div>Built with Go and ADHD medication. Not necessarily in that order.</div>
-  <div>© 2025–2026 Andy Dixon · <a href="https://{{.Host}}/">{{.Host}}</a></div>
+  <div>© 2025–2026 Andy Dixon · <a href="https://dixon.cx/">dixon.cx</a></div>
 </footer>
 
 </div>

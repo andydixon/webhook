@@ -8,12 +8,13 @@ package main
 import (
 	"bytes"
 	"context"
-	_ "embed"
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -31,6 +32,15 @@ import (
 var docsSrc string
 
 var docsTmpl = template.Must(template.New("docs").Parse(docsSrc))
+
+//go:embed static
+var staticFS embed.FS
+
+// assets serves favicons and the share image at the site root.
+var assets = func() http.Handler {
+	sub, _ := fs.Sub(staticFS, "static")
+	return http.FileServerFS(sub)
+}()
 
 const maxBody = 10 << 20 // 10 MB, like PHP's post_max_size
 
@@ -113,11 +123,24 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	path := strings.Trim(r.URL.Path, "/")
 	if path == "" {
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-		_ = docsTmpl.Execute(w, map[string]string{"Host": r.Host})
+		_ = docsTmpl.Execute(w, map[string]string{"Host": r.Host, "Canonical": hostName})
 		return
 	}
-	if path == "healthz" {
+	switch path {
+	case "healthz":
 		_, _ = io.WriteString(w, "ok\n")
+		return
+	case "favicon.ico", "favicon.svg", "apple-touch-icon.png", "og.png":
+		w.Header().Set("Cache-Control", "public, max-age=604800")
+		assets.ServeHTTP(w, r)
+		return
+	case "robots.txt":
+		w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+		fmt.Fprintf(w, "User-agent: *\nDisallow: /*%%40\nDisallow: /*@\nSitemap: https://%s/sitemap.xml\n", hostName)
+		return
+	case "sitemap.xml":
+		w.Header().Set("Content-Type", "application/xml; charset=UTF-8")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>`+"\n"+`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://%s/</loc></url></urlset>`+"\n", hostName)
 		return
 	}
 
