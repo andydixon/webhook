@@ -325,7 +325,7 @@ The image is a static binary on `distroless`, runs as non-root, listens on `:808
 | `LISTEN` | `127.0.0.1:8080` | Address to listen on (`:8080` in the container) |
 | `SMTP_ADDR` | `127.0.0.1:25` | SMTP relay, no auth or TLS (`172.17.0.1:25` in the container) |
 | `MAIL_FROM` | `no-reply@dixon.cx` | Envelope and From address |
-| `PUBLIC_HOST` | `webhooks.dixon.cx` | Host shown in email footers |
+| `PUBLIC_HOST` | `webhook.me.uk` | Host shown in email footers |
 
 `/healthz` returns `ok`, and `webhooks -check` exits non-zero if a running instance is unhealthy (used by the image's `HEALTHCHECK`).
 

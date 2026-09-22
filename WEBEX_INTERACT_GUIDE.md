@@ -15,7 +15,7 @@ https://your-domain.com/{your-email}/wxinteract
 ### Example
 
 ```
-https://webhooks.dixon.cx/sms-notifications%40mycompany.com/wxinteract
+https://webhook.me.uk/sms-notifications%40mycompany.com/wxinteract
 ```
 
 ## Supported Events

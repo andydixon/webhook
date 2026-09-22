@@ -17,9 +17,9 @@ https://your-domain.com/{email}/{parser-name}
 ```
 
 **Examples:**
-- `https://webhooks.dixon.cx/test%40example.com/github`
-- `https://webhooks.dixon.cx/user%40company.com/grafana`
-- `https://webhooks.dixon.cx/dev%40startup.io/json`
+- `https://webhook.me.uk/test%40example.com/github`
+- `https://webhook.me.uk/user%40company.com/grafana`
+- `https://webhook.me.uk/dev%40startup.io/json`
 
 ### How It Works
 
@@ -355,7 +355,7 @@ Real deliveries over HTTP/2 arrive with lowercase header names. `headers.Get` ha
 | `LISTEN` | `127.0.0.1:8080` | Address to listen on (`:8080` in the container) |
 | `SMTP_ADDR` | `127.0.0.1:25` | SMTP relay (`172.17.0.1:25` in the container, the host's postfix) |
 | `MAIL_FROM` | `no-reply@dixon.cx` | Envelope and From address |
-| `PUBLIC_HOST` | `webhooks.dixon.cx` | Host shown in email footers |
+| `PUBLIC_HOST` | `webhook.me.uk` | Host shown in email footers |
 
 ---
 
